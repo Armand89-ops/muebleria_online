@@ -7,9 +7,10 @@ import { Footer } from '@/components/footer'
 import { CartSidebar } from '@/components/cart-sidebar'
 import { ProductCard } from '@/components/product-card'
 import { getFeaturedProducts, getNewProducts, categories } from '@/lib/products'
+import { ProductsService } from './services/products.service'
 
-export default function HomePage() {
-  const featuredProducts = getFeaturedProducts()
+export default async function HomePage() {
+  const featuredProducts = await ProductsService.getFeatured();
   const newProducts = getNewProducts()
 
   return (
@@ -37,7 +38,7 @@ export default function HomePage() {
                 Diseño que transforma espacios
               </h1>
               <p className="mt-6 text-lg text-white/90 leading-relaxed max-w-xl">
-                Descubre nuestra colección exclusiva de muebles artesanales. 
+                Descubre nuestra colección exclusiva de muebles artesanales.
                 Cada pieza cuenta una historia de elegancia y confort.
               </p>
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
@@ -187,7 +188,7 @@ export default function HomePage() {
               Diseñamos el hogar de tus sueños
             </h2>
             <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
-              Nuestro equipo de diseñadores está listo para ayudarte a crear 
+              Nuestro equipo de diseñadores está listo para ayudarte a crear
               espacios únicos que reflejen tu personalidad y estilo de vida.
             </p>
             <Button asChild size="lg" className="mt-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90">
