@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -12,17 +12,51 @@ import { CartSidebar } from '@/components/cart-sidebar'
 import { ProductCard } from '@/components/product-card'
 import { useCart } from '@/context/cart-context'
 import { useWishlist } from '@/context/wishlist-context'
-import { getProductById, products } from '@/lib/products'
+import type { Product } from '@/lib/products'
 
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>()
-  const product = getProductById(id)
+  const [product, setProduct] = useState<Product | null>(null)
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const { addItem } = useCart()
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist()
 
   const [selectedImage, setSelectedImage] = useState(0)
-  const [selectedColor, setSelectedColor] = useState(product?.colors[0] ?? '')
+  const [selectedColor, setSelectedColor] = useState('')
   const [quantity, setQuantity] = useState(1)
+
+  useEffect(() => {
+    fetch(`/api/products/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Producto no encontrado')
+        return res.json()
+      })
+      .then((data) => {
+        setProduct(data.product || null)
+        if (data.product) {
+          setSelectedColor(data.product.colors?.[0] ?? '')
+        }
+        setRelatedProducts(data.related || [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <CartSidebar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-muted-foreground">Cargando producto...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
 
   if (!product) {
     return (
@@ -57,9 +91,6 @@ export default function ProductPage() {
     addItem(product, quantity, selectedColor)
   }
 
-  const relatedProducts = products
-    .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -99,13 +130,13 @@ export default function ProductPage() {
               <div className="space-y-4">
                 <div className="aspect-square relative rounded-lg overflow-hidden bg-muted">
                   <Image
-                    src={product.images[selectedImage] || "/placeholder.svg"}
+                    src={(product.images && product.images[selectedImage]) || product.image || "/placeholder.svg"}
                     alt={product.name}
                     fill
                     className="object-cover"
                     priority
                   />
-                  {product.new && (
+                  {(product.new || product.is_new) && (
                     <span className="absolute top-4 left-4 px-3 py-1 bg-accent text-accent-foreground text-sm font-medium rounded">
                       Nuevo
                     </span>
@@ -118,16 +149,15 @@ export default function ProductPage() {
                 </div>
 
                 {/* Thumbnails */}
-                {product.images.length > 1 && (
+                {product.images && product.images.length > 1 && (
                   <div className="flex gap-3">
                     {product.images.map((image, index) => (
                       <button
                         key={index}
                         type="button"
                         onClick={() => setSelectedImage(index)}
-                        className={`relative w-20 h-20 rounded-md overflow-hidden border-2 transition-colors ${
-                          selectedImage === index ? 'border-primary' : 'border-transparent'
-                        }`}
+                        className={`relative w-20 h-20 rounded-md overflow-hidden border-2 transition-colors ${selectedImage === index ? 'border-primary' : 'border-transparent'
+                          }`}
                       >
                         <Image
                           src={image || "/placeholder.svg"}
@@ -156,11 +186,10 @@ export default function ProductPage() {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`h-5 w-5 ${
-                          i < Math.floor(product.rating)
-                            ? 'fill-accent text-accent'
-                            : 'fill-muted text-muted'
-                        }`}
+                        className={`h-5 w-5 ${i < Math.floor(product.rating)
+                          ? 'fill-accent text-accent'
+                          : 'fill-muted text-muted'
+                          }`}
                       />
                     ))}
                   </div>
@@ -187,27 +216,28 @@ export default function ProductPage() {
                 </p>
 
                 {/* Colors */}
-                <div className="mt-8">
-                  <h3 className="text-sm font-medium text-foreground">
-                    Color: <span className="font-normal text-muted-foreground">{selectedColor}</span>
-                  </h3>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {product.colors.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => setSelectedColor(color)}
-                        className={`px-4 py-2 text-sm rounded-md border transition-colors ${
-                          selectedColor === color
+                {product.colors && product.colors.length > 0 && (
+                  <div className="mt-8">
+                    <h3 className="text-sm font-medium text-foreground">
+                      Color: <span className="font-normal text-muted-foreground">{selectedColor}</span>
+                    </h3>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {product.colors.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setSelectedColor(color)}
+                          className={`px-4 py-2 text-sm rounded-md border transition-colors ${selectedColor === color
                             ? 'border-primary bg-primary text-primary-foreground'
                             : 'border-border hover:border-primary'
-                        }`}
-                      >
-                        {color}
-                      </button>
-                    ))}
+                            }`}
+                        >
+                          {color}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Quantity */}
                 <div className="mt-8">
@@ -283,29 +313,35 @@ export default function ProductPage() {
                 </div>
 
                 {/* Specifications */}
-                <div className="mt-10 border-t border-border pt-8">
-                  <h3 className="text-lg font-medium text-foreground">Especificaciones</h3>
-                  <dl className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <dt className="text-muted-foreground">Dimensiones</dt>
-                      <dd className="mt-1 font-medium">
-                        {product.dimensions.width} x {product.dimensions.height} x {product.dimensions.depth} cm
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Materiales</dt>
-                      <dd className="mt-1 font-medium">{product.materials.join(', ')}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">Categoría</dt>
-                      <dd className="mt-1 font-medium">{product.subcategory}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground">SKU</dt>
-                      <dd className="mt-1 font-medium">LUXE-{product.id.padStart(6, '0')}</dd>
-                    </div>
-                  </dl>
-                </div>
+                {(product.dimensions || (product.materials && product.materials.length > 0)) && (
+                  <div className="mt-10 border-t border-border pt-8">
+                    <h3 className="text-lg font-medium text-foreground">Especificaciones</h3>
+                    <dl className="mt-4 grid grid-cols-2 gap-4 text-sm">
+                      {product.dimensions && (
+                        <div>
+                          <dt className="text-muted-foreground">Dimensiones</dt>
+                          <dd className="mt-1 font-medium">
+                            {product.dimensions.width} x {product.dimensions.height} x {product.dimensions.depth} cm
+                          </dd>
+                        </div>
+                      )}
+                      {product.materials && product.materials.length > 0 && (
+                        <div>
+                          <dt className="text-muted-foreground">Materiales</dt>
+                          <dd className="mt-1 font-medium">{product.materials.join(', ')}</dd>
+                        </div>
+                      )}
+                      <div>
+                        <dt className="text-muted-foreground">Categoría</dt>
+                        <dd className="mt-1 font-medium">{product.subcategory}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">SKU</dt>
+                        <dd className="mt-1 font-medium">LUXE-{product.id.padStart(6, '0')}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                )}
               </div>
             </div>
           </div>

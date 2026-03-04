@@ -1,5 +1,7 @@
 "use client"
 
+import { useState, useEffect } from 'react'
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { Minus, Plus, Trash2, ChevronRight, ShoppingBag, ArrowRight, Truck, Shield, RotateCcw } from 'lucide-react'
@@ -11,11 +13,21 @@ import { Footer } from '@/components/footer'
 import { CartSidebar } from '@/components/cart-sidebar'
 import { ProductCard } from '@/components/product-card'
 import { useCart } from '@/context/cart-context'
-import { getFeaturedProducts } from '@/lib/products'
+import type { Product } from '@/lib/products'
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice, totalItems, clearCart } = useCart()
-  const suggestedProducts = getFeaturedProducts().slice(0, 4)
+  const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        const products = Array.isArray(data) ? data : []
+        setSuggestedProducts(products.filter((p: Product) => p.featured).slice(0, 4))
+      })
+      .catch(() => { })
+  }, [])
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0 }).format(price)

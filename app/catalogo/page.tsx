@@ -26,7 +26,8 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { CartSidebar } from '@/components/cart-sidebar'
 import { ProductCard } from '@/components/product-card'
-import { products, categories } from '@/lib/products'
+import { categories } from '@/lib/products'
+import type { Product } from '@/lib/products'
 
 const sortOptions = [
   { value: 'featured', label: 'Destacados' },
@@ -57,6 +58,18 @@ export default function CatalogoPage() {
   const [inStockOnly, setInStockOnly] = useState(false)
   const [sortBy, setSortBy] = useState('featured')
   const [gridCols, setGridCols] = useState<3 | 4>(4)
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [loadingProducts, setLoadingProducts] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setAllProducts(Array.isArray(data) ? data : [])
+        setLoadingProducts(false)
+      })
+      .catch(() => setLoadingProducts(false))
+  }, [])
 
   useEffect(() => {
     setSelectedCategory(searchParams.get('category') || '')
@@ -64,7 +77,7 @@ export default function CatalogoPage() {
   }, [searchParams])
 
   const filteredProducts = useMemo(() => {
-    let result = [...products]
+    let result = [...allProducts]
 
     // Search filter
     if (searchQuery) {
@@ -110,14 +123,14 @@ export default function CatalogoPage() {
         result.sort((a, b) => b.rating - a.rating)
         break
       case 'newest':
-        result.sort((a, b) => (b.new ? 1 : 0) - (a.new ? 1 : 0))
+        result.sort((a, b) => ((b.new || b.is_new) ? 1 : 0) - ((a.new || a.is_new) ? 1 : 0))
         break
       default:
         result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
     }
 
     return result
-  }, [searchQuery, selectedCategory, selectedSubcategories, priceRange, inStockOnly, sortBy])
+  }, [searchQuery, selectedCategory, selectedSubcategories, priceRange, inStockOnly, sortBy, allProducts])
 
   const currentCategory = categories.find((c) => c.id === selectedCategory)
 
@@ -173,11 +186,10 @@ export default function CatalogoPage() {
               setSelectedCategory('')
               setSelectedSubcategories([])
             }}
-            className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-              !selectedCategory
-                ? 'bg-primary text-primary-foreground'
-                : 'hover:bg-muted'
-            }`}
+            className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${!selectedCategory
+              ? 'bg-primary text-primary-foreground'
+              : 'hover:bg-muted'
+              }`}
           >
             Todas las categorías
           </button>
@@ -189,11 +201,10 @@ export default function CatalogoPage() {
                 setSelectedCategory(category.id)
                 setSelectedSubcategories([])
               }}
-              className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                selectedCategory === category.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'hover:bg-muted'
-              }`}
+              className={`block w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${selectedCategory === category.id
+                ? 'bg-primary text-primary-foreground'
+                : 'hover:bg-muted'
+                }`}
             >
               {category.name}
             </button>
@@ -237,8 +248,8 @@ export default function CatalogoPage() {
             step={1000}
           />
           <div className="flex justify-between mt-2 text-sm text-muted-foreground">
-            <span>${priceRange[0].toLocaleString()}</span>
-            <span>${priceRange[1].toLocaleString()}</span>
+            <span>${priceRange[0].toLocaleString('es-MX')}</span>
+            <span>${priceRange[1].toLocaleString('es-MX')}</span>
           </div>
         </div>
       </div>
@@ -252,11 +263,10 @@ export default function CatalogoPage() {
               key={range.label}
               type="button"
               onClick={() => setPriceRange([range.min, range.max])}
-              className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
-                priceRange[0] === range.min && priceRange[1] === range.max
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'border-border hover:border-primary'
-              }`}
+              className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${priceRange[0] === range.min && priceRange[1] === range.max
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'border-border hover:border-primary'
+                }`}
             >
               {range.label}
             </button>
@@ -427,11 +437,25 @@ export default function CatalogoPage() {
               )}
 
               {/* Product Grid */}
-              {filteredProducts.length > 0 ? (
+              {loadingProducts ? (
+                <div className={`grid grid-cols-1 sm:grid-cols-2 ${gridCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-3 xl:grid-cols-4'
+                  } gap-6`}>
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div className="aspect-[4/3] bg-muted rounded-t-lg" />
+                      <div className="p-4 space-y-3 border border-t-0 border-border rounded-b-lg">
+                        <div className="h-3 bg-muted rounded w-1/3" />
+                        <div className="h-5 bg-muted rounded w-3/4" />
+                        <div className="h-3 bg-muted rounded w-1/2" />
+                        <div className="h-6 bg-muted rounded w-1/3" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : filteredProducts.length > 0 ? (
                 <div
-                  className={`grid grid-cols-1 sm:grid-cols-2 ${
-                    gridCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-3 xl:grid-cols-4'
-                  } gap-6`}
+                  className={`grid grid-cols-1 sm:grid-cols-2 ${gridCols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-3 xl:grid-cols-4'
+                    } gap-6`}
                 >
                   {filteredProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
