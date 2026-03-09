@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from 'react'
 import Link from 'next/link'
 
 const footerLinks = {
@@ -22,6 +25,37 @@ const footerLinks = {
 }
 
 export function Footer() {
+  const [email, setEmail] = useState('')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [message, setMessage] = useState('')
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email.trim()) return
+
+    setStatus('loading')
+    try {
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setStatus('success')
+        setMessage('¡Gracias por suscribirte!')
+        setEmail('')
+        setTimeout(() => { setStatus('idle'); setMessage('') }, 4000)
+      } else {
+        setStatus('error')
+        setMessage(data.error || 'Error al suscribir')
+      }
+    } catch {
+      setStatus('error')
+      setMessage('Error de conexión')
+    }
+  }
+
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
@@ -30,24 +64,35 @@ export function Footer() {
           <div className="lg:col-span-2">
             <h2 className="font-serif text-3xl font-bold mb-4">LUXE</h2>
             <p className="text-primary-foreground/70 text-sm leading-relaxed max-w-md">
-              Transformamos espacios con muebles de diseño exclusivo. 
+              Transformamos espacios con muebles de diseño exclusivo.
               Cada pieza es una declaración de estilo y calidad que perdura en el tiempo.
             </p>
             <div className="mt-6">
               <p className="text-sm text-primary-foreground/70">Suscríbete a nuestro newsletter</p>
-              <form className="mt-2 flex gap-2">
-                <input
-                  type="email"
-                  placeholder="tu@email.com"
-                  className="flex-1 px-4 py-2 bg-primary-foreground/10 border border-primary-foreground/20 rounded-md text-sm placeholder:text-primary-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary-foreground/30"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary-foreground text-primary text-sm font-medium rounded-md hover:bg-primary-foreground/90 transition-colors"
-                >
-                  Suscribir
-                </button>
-              </form>
+              {status === 'success' ? (
+                <p className="mt-2 text-sm text-green-300 font-medium">{message}</p>
+              ) : (
+                <form className="mt-2 flex gap-2" onSubmit={handleSubscribe}>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="tu@email.com"
+                    required
+                    className="flex-1 px-4 py-2 bg-primary-foreground/10 border border-primary-foreground/20 rounded-md text-sm placeholder:text-primary-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary-foreground/30"
+                  />
+                  <button
+                    type="submit"
+                    disabled={status === 'loading'}
+                    className="px-4 py-2 bg-primary-foreground text-primary text-sm font-medium rounded-md hover:bg-primary-foreground/90 transition-colors disabled:opacity-50"
+                  >
+                    {status === 'loading' ? '...' : 'Suscribir'}
+                  </button>
+                </form>
+              )}
+              {status === 'error' && (
+                <p className="mt-1 text-xs text-red-300">{message}</p>
+              )}
             </div>
           </div>
 

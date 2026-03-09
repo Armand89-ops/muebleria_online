@@ -2,10 +2,10 @@
 
 import React from "react"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronLeft, CreditCard, Truck, Check } from 'lucide-react'
+import { ChevronLeft, CreditCard, Truck, Check, MapPin, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,6 +15,7 @@ import { Header } from '@/components/header'
 import { CartSidebar } from '@/components/cart-sidebar'
 import { useCart } from '@/context/cart-context'
 import { useOrders } from '@/context/orders-context'
+import { useAuth } from '@/context/auth-context'
 
 const shippingOptions = [
   { id: 'standard', name: 'Envío Estándar', price: 0, time: '5-7 días hábiles' },
@@ -25,9 +26,16 @@ const shippingOptions = [
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart()
   const { addOrder } = useOrders()
+  const { isAuthenticated } = useAuth()
   const [step, setStep] = useState<'shipping' | 'payment' | 'confirmation'>('shipping')
   const [shippingMethod, setShippingMethod] = useState('standard')
   const [orderPlaced, setOrderPlaced] = useState(false)
+  const [placing, setPlacing] = useState(false)
+
+  // Saved addresses
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([])
+  const [selectedAddressId, setSelectedAddressId] = useState<number | 'new'>('new')
+  const [addressesLoading, setAddressesLoading] = useState(false)
 
   const [formData, setFormData] = useState({
     email: '',
@@ -43,6 +51,61 @@ export default function CheckoutPage() {
     expiry: '',
     cvv: '',
   })
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  // Load saved addresses for authenticated users
+  useEffect(() => {
+    if (isAuthenticated) {
+      setAddressesLoading(true)
+      fetch('/api/user/addresses')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            setSavedAddresses(data)
+            const defaultAddr = data.find((a: any) => a.es_predeterminada) || data[0]
+            if (defaultAddr) {
+              setSelectedAddressId(defaultAddr.id)
+              fillFromAddress(defaultAddr)
+            }
+          }
+        })
+        .catch(() => { })
+        .finally(() => setAddressesLoading(false))
+    }
+  }, [isAuthenticated])
+
+  const fillFromAddress = (addr: any) => {
+    const nameParts = (addr.nombre || '').split(' ')
+    setFormData(prev => ({
+      ...prev,
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' ') || '',
+      address: addr.direccion || '',
+      city: addr.ciudad || '',
+      state: addr.estado || '',
+      zip: addr.codigo_postal || '',
+    }))
+  }
+
+  const handleSelectAddress = (id: number | 'new') => {
+    setSelectedAddressId(id)
+    if (id === 'new') {
+      setFormData(prev => ({
+        ...prev,
+        firstName: '',
+        lastName: '',
+        address: '',
+        city: '',
+        state: '',
+        zip: '',
+      }))
+    } else {
+      const addr = savedAddresses.find(a => a.id === id)
+      if (addr) fillFromAddress(addr)
+    }
+    setFieldErrors({})
+  }
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-MX', {
@@ -63,12 +126,52 @@ export default function CheckoutPage() {
       ...prev,
       [e.target.name]: e.target.value,
     }))
+    if (fieldErrors[e.target.name]) {
+      setFieldErrors(prev => ({ ...prev, [e.target.name]: '' }))
+    }
   }
 
   const [orderId, setOrderId] = useState('')
 
-  const handlePlaceOrder = () => {
-    const id = addOrder({
+  const validateShipping = () => {
+    const errors: Record<string, string> = {}
+    if (!formData.email.trim()) errors.email = 'El correo es obligatorio'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = 'Formato no válido'
+    if (!formData.firstName.trim()) errors.firstName = 'El nombre es obligatorio'
+    if (!formData.lastName.trim()) errors.lastName = 'El apellido es obligatorio'
+    if (!formData.address.trim()) errors.address = 'La dirección es obligatoria'
+    if (!formData.city.trim()) errors.city = 'La ciudad es obligatoria'
+    if (!formData.state.trim()) errors.state = 'El estado es obligatorio'
+    if (!formData.zip.trim()) errors.zip = 'El CP es obligatorio'
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const validatePayment = () => {
+    const errors: Record<string, string> = {}
+    if (!formData.cardNumber.trim()) errors.cardNumber = 'El número de tarjeta es obligatorio'
+    else if (formData.cardNumber.replace(/\s/g, '').length < 13) errors.cardNumber = 'Número de tarjeta no válido'
+    if (!formData.cardName.trim()) errors.cardName = 'El nombre es obligatorio'
+    if (!formData.expiry.trim()) errors.expiry = 'La fecha es obligatoria'
+    else if (!/^\d{2}\/\d{2}$/.test(formData.expiry)) errors.expiry = 'Formato: MM/AA'
+    if (!formData.cvv.trim()) errors.cvv = 'El CVV es obligatorio'
+    else if (formData.cvv.length < 3) errors.cvv = 'CVV no válido'
+    setFieldErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleContinueToPayment = () => {
+    if (validateShipping()) {
+      setStep('payment')
+      setFieldErrors({})
+    }
+  }
+
+  const handlePlaceOrder = async () => {
+    if (!validatePayment()) return
+
+    setPlacing(true)
+    const orderData = {
       items: items.map(item => ({ ...item })),
       subtotal,
       shipping: shippingCost,
@@ -81,11 +184,31 @@ export default function CheckoutPage() {
         state: formData.state,
         zip: formData.zip,
       },
-    })
+    }
+
+    let id: string
+
+    if (isAuthenticated) {
+      try {
+        const res = await fetch('/api/user/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData),
+        })
+        const data = await res.json()
+        id = data.id || 'LUXE-ERROR'
+      } catch {
+        id = addOrder(orderData)
+      }
+    } else {
+      id = addOrder(orderData)
+    }
+
     setOrderId(id)
     setOrderPlaced(true)
     setStep('confirmation')
     clearCart()
+    setPlacing(false)
   }
 
   if (items.length === 0 && !orderPlaced) {
@@ -168,18 +291,16 @@ export default function CheckoutPage() {
           {/* Progress Steps */}
           <div className="flex items-center gap-4 mb-10">
             <div className={`flex items-center gap-2 ${step === 'shipping' ? 'text-foreground' : 'text-muted-foreground'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step === 'shipping' ? 'bg-primary text-primary-foreground' : step === 'payment' ? 'bg-green-500 text-white' : 'bg-muted'
-              }`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step === 'shipping' ? 'bg-primary text-primary-foreground' : step === 'payment' ? 'bg-green-500 text-white' : 'bg-muted'
+                }`}>
                 {step === 'payment' ? <Check className="h-4 w-4" /> : '1'}
               </div>
               <span className="text-sm font-medium hidden sm:inline">Envío</span>
             </div>
             <div className="flex-1 h-px bg-border" />
             <div className={`flex items-center gap-2 ${step === 'payment' ? 'text-foreground' : 'text-muted-foreground'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step === 'payment' ? 'bg-primary text-primary-foreground' : 'bg-muted'
-              }`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${step === 'payment' ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                }`}>
                 2
               </div>
               <span className="text-sm font-medium hidden sm:inline">Pago</span>
@@ -203,9 +324,10 @@ export default function CheckoutPage() {
                           type="email"
                           value={formData.email}
                           onChange={handleInputChange}
-                          className="mt-1"
+                          className={`mt-1 ${fieldErrors.email ? 'border-destructive' : ''}`}
                           placeholder="tu@email.com"
                         />
+                        {fieldErrors.email && <p className="text-xs text-destructive mt-1">{fieldErrors.email}</p>}
                       </div>
                       <div>
                         <Label htmlFor="phone">Teléfono</Label>
@@ -222,74 +344,141 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  {/* Shipping Address */}
-                  <div>
-                    <h2 className="text-lg font-medium mb-4">Dirección de Envío</h2>
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="firstName">Nombre</Label>
-                          <Input
-                            id="firstName"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleInputChange}
-                            className="mt-1"
-                          />
+                  {/* Saved Addresses Selector */}
+                  {isAuthenticated && savedAddresses.length > 0 && (
+                    <div>
+                      <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
+                        <MapPin className="h-5 w-5" />
+                        Direcciones Guardadas
+                      </h2>
+                      {addressesLoading ? (
+                        <div className="flex justify-center py-4">
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
                         </div>
-                        <div>
-                          <Label htmlFor="lastName">Apellido</Label>
-                          <Input
-                            id="lastName"
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleInputChange}
-                            className="mt-1"
-                          />
+                      ) : (
+                        <div className="space-y-2 mb-4">
+                          {savedAddresses.map(addr => (
+                            <div
+                              key={addr.id}
+                              onClick={() => handleSelectAddress(addr.id)}
+                              className={`p-4 border rounded-lg cursor-pointer transition-colors ${selectedAddressId === addr.id ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/30'
+                                }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedAddressId === addr.id ? 'border-primary' : 'border-muted-foreground/40'
+                                  }`}>
+                                  {selectedAddressId === addr.id && (
+                                    <div className="w-2 h-2 rounded-full bg-primary" />
+                                  )}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium">
+                                    {addr.etiqueta} — {addr.nombre}
+                                    {addr.es_predeterminada && (
+                                      <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">Predeterminada</span>
+                                    )}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">{addr.direccion}, {addr.ciudad}, {addr.estado} {addr.codigo_postal}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          <div
+                            onClick={() => handleSelectAddress('new')}
+                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${selectedAddressId === 'new' ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground/30'
+                              }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedAddressId === 'new' ? 'border-primary' : 'border-muted-foreground/40'
+                                }`}>
+                                {selectedAddressId === 'new' && (
+                                  <div className="w-2 h-2 rounded-full bg-primary" />
+                                )}
+                              </div>
+                              <p className="text-sm font-medium">Usar otra dirección</p>
+                            </div>
+                          </div>
                         </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Shipping Address Form */}
+                  {(selectedAddressId === 'new' || !isAuthenticated || savedAddresses.length === 0) && (
+                    <div>
+                      <h2 className="text-lg font-medium mb-4">Dirección de Envío</h2>
+                    </div>
+                  )}
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="firstName">Nombre</Label>
+                        <Input
+                          id="firstName"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleInputChange}
+                          className={`mt-1 ${fieldErrors.firstName ? 'border-destructive' : ''}`}
+                        />
+                        {fieldErrors.firstName && <p className="text-xs text-destructive mt-1">{fieldErrors.firstName}</p>}
                       </div>
                       <div>
-                        <Label htmlFor="address">Dirección</Label>
+                        <Label htmlFor="lastName">Apellido</Label>
                         <Input
-                          id="address"
-                          name="address"
-                          value={formData.address}
+                          id="lastName"
+                          name="lastName"
+                          value={formData.lastName}
                           onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder="Calle, número, colonia"
+                          className={`mt-1 ${fieldErrors.lastName ? 'border-destructive' : ''}`}
                         />
+                        {fieldErrors.lastName && <p className="text-xs text-destructive mt-1">{fieldErrors.lastName}</p>}
                       </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor="city">Ciudad</Label>
-                          <Input
-                            id="city"
-                            name="city"
-                            value={formData.city}
-                            onChange={handleInputChange}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="state">Estado</Label>
-                          <Input
-                            id="state"
-                            name="state"
-                            value={formData.state}
-                            onChange={handleInputChange}
-                            className="mt-1"
-                          />
-                        </div>
-                        <div className="col-span-2 sm:col-span-1">
-                          <Label htmlFor="zip">Código Postal</Label>
-                          <Input
-                            id="zip"
-                            name="zip"
-                            value={formData.zip}
-                            onChange={handleInputChange}
-                            className="mt-1"
-                          />
-                        </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="address">Dirección</Label>
+                      <Input
+                        id="address"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        className={`mt-1 ${fieldErrors.address ? 'border-destructive' : ''}`}
+                        placeholder="Calle, número, colonia"
+                      />
+                      {fieldErrors.address && <p className="text-xs text-destructive mt-1">{fieldErrors.address}</p>}
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="city">Ciudad</Label>
+                        <Input
+                          id="city"
+                          name="city"
+                          value={formData.city}
+                          onChange={handleInputChange}
+                          className={`mt-1 ${fieldErrors.city ? 'border-destructive' : ''}`}
+                        />
+                        {fieldErrors.city && <p className="text-xs text-destructive mt-1">{fieldErrors.city}</p>}
+                      </div>
+                      <div>
+                        <Label htmlFor="state">Estado</Label>
+                        <Input
+                          id="state"
+                          name="state"
+                          value={formData.state}
+                          onChange={handleInputChange}
+                          className={`mt-1 ${fieldErrors.state ? 'border-destructive' : ''}`}
+                        />
+                        {fieldErrors.state && <p className="text-xs text-destructive mt-1">{fieldErrors.state}</p>}
+                      </div>
+                      <div className="col-span-2 sm:col-span-1">
+                        <Label htmlFor="zip">Código Postal</Label>
+                        <Input
+                          id="zip"
+                          name="zip"
+                          value={formData.zip}
+                          onChange={handleInputChange}
+                          className={`mt-1 ${fieldErrors.zip ? 'border-destructive' : ''}`}
+                        />
+                        {fieldErrors.zip && <p className="text-xs text-destructive mt-1">{fieldErrors.zip}</p>}
                       </div>
                     </div>
                   </div>
@@ -302,9 +491,8 @@ export default function CheckoutPage() {
                         {shippingOptions.map((option) => (
                           <div
                             key={option.id}
-                            className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors ${
-                              shippingMethod === option.id ? 'border-primary bg-primary/5' : 'border-border'
-                            }`}
+                            className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-colors ${shippingMethod === option.id ? 'border-primary bg-primary/5' : 'border-border'
+                              }`}
                             onClick={() => setShippingMethod(option.id)}
                           >
                             <div className="flex items-center gap-3">
@@ -325,7 +513,7 @@ export default function CheckoutPage() {
                     </RadioGroup>
                   </div>
 
-                  <Button size="lg" className="w-full" onClick={() => setStep('payment')}>
+                  <Button size="lg" className="w-full" onClick={handleContinueToPayment}>
                     Continuar al Pago
                   </Button>
                 </div>
@@ -347,9 +535,10 @@ export default function CheckoutPage() {
                           name="cardNumber"
                           value={formData.cardNumber}
                           onChange={handleInputChange}
-                          className="mt-1"
+                          className={`mt-1 ${fieldErrors.cardNumber ? 'border-destructive' : ''}`}
                           placeholder="1234 5678 9012 3456"
                         />
+                        {fieldErrors.cardNumber && <p className="text-xs text-destructive mt-1">{fieldErrors.cardNumber}</p>}
                       </div>
                       <div>
                         <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
@@ -358,9 +547,10 @@ export default function CheckoutPage() {
                           name="cardName"
                           value={formData.cardName}
                           onChange={handleInputChange}
-                          className="mt-1"
+                          className={`mt-1 ${fieldErrors.cardName ? 'border-destructive' : ''}`}
                           placeholder="NOMBRE APELLIDO"
                         />
+                        {fieldErrors.cardName && <p className="text-xs text-destructive mt-1">{fieldErrors.cardName}</p>}
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -370,9 +560,10 @@ export default function CheckoutPage() {
                             name="expiry"
                             value={formData.expiry}
                             onChange={handleInputChange}
-                            className="mt-1"
+                            className={`mt-1 ${fieldErrors.expiry ? 'border-destructive' : ''}`}
                             placeholder="MM/AA"
                           />
+                          {fieldErrors.expiry && <p className="text-xs text-destructive mt-1">{fieldErrors.expiry}</p>}
                         </div>
                         <div>
                           <Label htmlFor="cvv">CVV</Label>
@@ -381,9 +572,10 @@ export default function CheckoutPage() {
                             name="cvv"
                             value={formData.cvv}
                             onChange={handleInputChange}
-                            className="mt-1"
+                            className={`mt-1 ${fieldErrors.cvv ? 'border-destructive' : ''}`}
                             placeholder="123"
                           />
+                          {fieldErrors.cvv && <p className="text-xs text-destructive mt-1">{fieldErrors.cvv}</p>}
                         </div>
                       </div>
                     </div>
@@ -407,7 +599,7 @@ export default function CheckoutPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setStep('shipping')}
+                      onClick={() => { setStep('shipping'); setFieldErrors({}) }}
                       className="text-sm text-accent hover:underline mt-2"
                     >
                       Editar
@@ -415,11 +607,15 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="flex gap-4">
-                    <Button variant="outline" size="lg" onClick={() => setStep('shipping')}>
+                    <Button variant="outline" size="lg" onClick={() => { setStep('shipping'); setFieldErrors({}) }}>
                       Volver
                     </Button>
-                    <Button size="lg" className="flex-1" onClick={handlePlaceOrder}>
-                      Confirmar Pedido - {formatPrice(total)}
+                    <Button size="lg" className="flex-1" onClick={handlePlaceOrder} disabled={placing}>
+                      {placing ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Procesando...</>
+                      ) : (
+                        `Confirmar Pedido - ${formatPrice(total)}`
+                      )}
                     </Button>
                   </div>
                 </div>

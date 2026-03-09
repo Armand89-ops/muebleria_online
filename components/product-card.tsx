@@ -37,7 +37,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <div className="group relative bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-all duration-300">
       {/* Badges */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-        {product.new && (
+        {(product.new || product.is_new) && (
           <span className="px-2 py-1 bg-accent text-accent-foreground text-xs font-medium rounded">
             Nuevo
           </span>
@@ -106,11 +106,10 @@ export function ProductCard({ product }: ProductCardProps) {
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`h-3 w-3 ${
-                  i < Math.floor(product.rating)
+                className={`h-3 w-3 ${i < Math.floor(product.rating)
                     ? 'fill-accent text-accent'
                     : 'fill-muted text-muted'
-                }`}
+                  }`}
               />
             ))}
           </div>
@@ -132,11 +131,13 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Colors */}
-        <div className="mt-3 flex items-center gap-1">
-          <span className="text-xs text-muted-foreground">
-            {product.colors.length} {product.colors.length === 1 ? 'color' : 'colores'}
-          </span>
-        </div>
+        {product.colors && product.colors.length > 0 && (
+          <div className="mt-3 flex items-center gap-1">
+            <span className="text-xs text-muted-foreground">
+              {product.colors.length} {product.colors.length === 1 ? 'color' : 'colores'}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )

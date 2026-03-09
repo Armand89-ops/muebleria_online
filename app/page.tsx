@@ -6,12 +6,21 @@ import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { CartSidebar } from '@/components/cart-sidebar'
 import { ProductCard } from '@/components/product-card'
-import { getFeaturedProducts, getNewProducts, categories } from '@/lib/products'
+import { categories, products as fallbackProducts } from '@/lib/products'
 import { ProductsService } from './services/products.service'
 
 export default async function HomePage() {
-  const featuredProducts = await ProductsService.getFeatured();
-  const newProducts = getNewProducts()
+  let featuredProducts;
+  let newProducts;
+
+  try {
+    featuredProducts = await ProductsService.getFeatured();
+    newProducts = await ProductsService.getAll();
+  } catch (error) {
+    console.error('Error al conectar con la BD, usando datos de respaldo:', error);
+    featuredProducts = fallbackProducts.filter(p => p.featured);
+    newProducts = fallbackProducts.filter(p => p.new);
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

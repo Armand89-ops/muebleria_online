@@ -7,19 +7,21 @@ export interface Product {
   category: string
   subcategory: string
   image: string
-  images: string[]
+  images?: string[]
   rating: number
   reviews: number
   inStock: boolean
   featured: boolean
-  new: boolean
-  colors: string[]
-  materials: string[]
-  dimensions: {
+  new?: boolean
+  is_new?: boolean
+  colors?: string[]
+  materials?: string[]
+  stock?: number
+  dimensions?: {
     width: number
     height: number
     depth: number
-  }
+  } | null
 }
 
 export const categories = [
@@ -301,7 +303,7 @@ export function getNewProducts(): Product[] {
 
 export function searchProducts(query: string): Product[] {
   const lowercaseQuery = query.toLowerCase()
-  return products.filter(p => 
+  return products.filter(p =>
     p.name.toLowerCase().includes(lowercaseQuery) ||
     p.description.toLowerCase().includes(lowercaseQuery) ||
     p.category.toLowerCase().includes(lowercaseQuery) ||
@@ -323,7 +325,7 @@ export function filterProducts(filters: {
     if (filters.minPrice && p.price < filters.minPrice) return false
     if (filters.maxPrice && p.price > filters.maxPrice) return false
     if (filters.inStock !== undefined && p.inStock !== filters.inStock) return false
-    if (filters.materials?.length && !filters.materials.some(m => p.materials.includes(m))) return false
+    if (filters.materials?.length && !filters.materials.some(m => p.materials?.includes(m))) return false
     return true
   })
 }

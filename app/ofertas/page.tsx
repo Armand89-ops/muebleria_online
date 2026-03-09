@@ -1,21 +1,33 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
-import { ChevronRight, Tag, Clock, Percent } from 'lucide-react'
+import { ChevronRight, Tag, Clock, Percent, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Header } from '@/components/header'
 import { Footer } from '@/components/footer'
 import { CartSidebar } from '@/components/cart-sidebar'
 import { ProductCard } from '@/components/product-card'
-import { products } from '@/lib/products'
+import type { Product } from '@/lib/products'
 
 export default function OfertasPage() {
   const [sortBy, setSortBy] = useState<'discount' | 'price-asc' | 'price-desc'>('discount')
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => {
+        setAllProducts(Array.isArray(data) ? data : [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
 
   const discountProducts = useMemo(() => {
-    const filtered = products.filter(p => p.originalPrice && p.originalPrice > p.price)
+    const filtered = allProducts.filter(p => p.originalPrice && p.originalPrice > p.price)
 
     switch (sortBy) {
       case 'price-asc':
@@ -30,7 +42,7 @@ export default function OfertasPage() {
           return discB - discA
         })
     }
-  }, [sortBy])
+  }, [sortBy, allProducts])
 
   const totalSavings = discountProducts.reduce((acc, p) => acc + (p.originalPrice! - p.price), 0)
 
@@ -65,19 +77,21 @@ export default function OfertasPage() {
               Grandes Descuentos en Muebles de Diseno
             </h1>
             <p className="mt-4 text-primary-foreground/80 max-w-2xl mx-auto">
-              Aprovecha nuestras ofertas especiales en piezas seleccionadas. 
+              Aprovecha nuestras ofertas especiales en piezas seleccionadas.
               Renueva tu hogar con hasta un 20% de descuento.
             </p>
-            <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-6">
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4" />
-                <span>Ofertas por tiempo limitado</span>
+            {!loading && (
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-6">
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4" />
+                  <span>Ofertas por tiempo limitado</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Percent className="h-4 w-4" />
+                  <span>Ahorra hasta {formatPrice(totalSavings)} en total</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Percent className="h-4 w-4" />
-                <span>Ahorra hasta {formatPrice(totalSavings)} en total</span>
-              </div>
-            </div>
+            )}
           </div>
         </section>
 
@@ -86,7 +100,7 @@ export default function OfertasPage() {
           {/* Toolbar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <p className="text-muted-foreground">
-              {discountProducts.length} producto{discountProducts.length !== 1 ? 's' : ''} en oferta
+              {loading ? 'Cargando ofertas...' : `${discountProducts.length} producto${discountProducts.length !== 1 ? 's' : ''} en oferta`}
             </p>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Ordenar:</span>
@@ -100,11 +114,10 @@ export default function OfertasPage() {
                     key={option.value}
                     type="button"
                     onClick={() => setSortBy(option.value)}
-                    className={`px-3 py-1.5 text-sm transition-colors ${
-                      sortBy === option.value
+                    className={`px-3 py-1.5 text-sm transition-colors ${sortBy === option.value
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-card text-foreground hover:bg-muted'
-                    }`}
+                      }`}
                   >
                     {option.label}
                   </button>
@@ -113,7 +126,12 @@ export default function OfertasPage() {
             </div>
           </div>
 
-          {discountProducts.length > 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Cargando ofertas...</p>
+            </div>
+          ) : discountProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {discountProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
