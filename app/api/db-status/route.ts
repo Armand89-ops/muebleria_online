@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { pool } from '@/lib/db';
-import { RowDataPacket } from 'mysql2';
+import { supabase } from '@/lib/db';
 
 export async function GET() {
     // Block access in production
@@ -13,7 +12,6 @@ export async function GET() {
 
     const result: {
         connected: boolean;
-        mysqlVersion: string | null;
         database: string | null;
         productCount: number | null;
         tables: string[];
@@ -21,8 +19,7 @@ export async function GET() {
         timestamp: string;
     } = {
         connected: false,
-        mysqlVersion: null,
-        database: null,
+        database: 'Supabase (PostgreSQL)',
         productCount: null,
         tables: [],
         error: null,
@@ -30,27 +27,24 @@ export async function GET() {
     };
 
     try {
-        // Test connection
-        const connection = await pool.getConnection();
+        // Test connection by counting products
+        const { count, error } = await supabase
+            .from('productos')
+            .select('*', { count: 'exact', head: true });
 
-        // Get MySQL version
-        const [versionRows] = await connection.query<RowDataPacket[]>('SELECT VERSION() as version');
-        result.mysqlVersion = versionRows[0]?.version || null;
+        if (error) throw error;
 
-        // Get current database
-        const [dbRows] = await connection.query<RowDataPacket[]>('SELECT DATABASE() as db');
-        result.database = dbRows[0]?.db || null;
-
-        // Get product count
-        const [countRows] = await connection.query<RowDataPacket[]>('SELECT COUNT(*) as total FROM productos');
-        result.productCount = countRows[0]?.total || 0;
-
-        // Get tables
-        const [tableRows] = await connection.query<RowDataPacket[]>('SHOW TABLES');
-        result.tables = tableRows.map((row: RowDataPacket) => Object.values(row)[0] as string);
-
+        result.productCount = count || 0;
         result.connected = true;
-        connection.release();
+
+        // List known tables
+        result.tables = [
+            'productos', 'producto_colores', 'producto_imagenes', 'producto_materiales',
+            'usuarios', 'usuario_direcciones', 'usuario_carrito',
+            'pedidos', 'pedido_items',
+            'usuario_favoritos', 'producto_resenas',
+            'suscriptores_newsletter', 'mensajes_contacto',
+        ];
 
         return NextResponse.json(result);
     } catch (error) {

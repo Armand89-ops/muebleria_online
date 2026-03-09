@@ -4,11 +4,12 @@ import React from "react"
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Search, ShoppingBag, Menu, X, User, Heart } from 'lucide-react'
+import { Search, ShoppingBag, Menu, X, User, Heart, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useCart } from '@/context/cart-context'
 import { useWishlist } from '@/context/wishlist-context'
+import { useAuth } from '@/context/auth-context'
 import { useRouter } from 'next/navigation'
 import {
   Sheet,
@@ -32,6 +33,7 @@ export function Header() {
   const [showSearch, setShowSearch] = useState(false)
   const { totalItems, openCart } = useCart()
   const { totalItems: wishlistTotal } = useWishlist()
+  const { user, isAuthenticated } = useAuth()
   const router = useRouter()
 
   const handleSearch = (e: React.FormEvent) => {
@@ -67,12 +69,25 @@ export function Header() {
                   </Link>
                 ))}
                 <div className="border-t border-border pt-4 mt-2">
-                  <Link href="/cuenta" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                    <User className="h-5 w-5" /> Mi Cuenta
-                  </Link>
-                  <Link href="/cuenta?tab=favoritos" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                    <Heart className="h-5 w-5" /> Favoritos
-                  </Link>
+                  {isAuthenticated ? (
+                    <>
+                      <Link href="/cuenta" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                        <User className="h-5 w-5" /> {user?.nombre || 'Mi Cuenta'}
+                      </Link>
+                      <Link href="/cuenta?tab=favoritos" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                        <Heart className="h-5 w-5" /> Favoritos
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/login" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                        <LogIn className="h-5 w-5" /> Iniciar Sesión
+                      </Link>
+                      <Link href="/registro" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                        <User className="h-5 w-5" /> Crear Cuenta
+                      </Link>
+                    </>
+                  )}
                   <Link href="/contacto" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
                     Contacto
                   </Link>
@@ -142,12 +157,23 @@ export function Header() {
             </Link>
 
             {/* Account */}
-            <Link href="/cuenta" className="hidden sm:flex">
-              <Button variant="ghost" size="icon">
-                <User className="h-5 w-5" />
-                <span className="sr-only">Mi cuenta</span>
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <Link href="/cuenta" className="hidden sm:flex">
+                <Button variant="ghost" size="icon" className="relative">
+                  <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                    {user?.nombre?.[0]}{user?.apellido?.[0]}
+                  </div>
+                  <span className="sr-only">Mi cuenta</span>
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/login" className="hidden sm:flex">
+                <Button variant="ghost" size="sm" className="gap-1.5 text-sm">
+                  <LogIn className="h-4 w-4" />
+                  Ingresar
+                </Button>
+              </Link>
+            )}
 
             {/* Cart */}
             <Button variant="ghost" size="icon" className="relative" onClick={openCart}>

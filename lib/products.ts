@@ -16,6 +16,7 @@ export interface Product {
   is_new?: boolean
   colors?: string[]
   materials?: string[]
+  stock?: number
   dimensions?: {
     width: number
     height: number

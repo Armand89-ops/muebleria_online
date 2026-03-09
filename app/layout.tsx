@@ -6,6 +6,7 @@ import './globals.css'
 import { CartProvider } from '@/context/cart-context'
 import { WishlistProvider } from '@/context/wishlist-context'
 import { OrdersProvider } from '@/context/orders-context'
+import { AuthProvider } from '@/context/auth-context'
 
 const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-serif' });
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
@@ -41,13 +42,15 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${playfair.variable} ${inter.variable} font-sans antialiased`}>
-        <CartProvider>
-          <WishlistProvider>
-            <OrdersProvider>
-              {children}
-            </OrdersProvider>
-          </WishlistProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <OrdersProvider>
+                {children}
+              </OrdersProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

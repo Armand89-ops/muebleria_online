@@ -1,8 +1,7 @@
-import { pool } from '@/lib/db';
+import { supabase } from '@/lib/db';
 import { Product } from '@/lib/products';
-import { RowDataPacket } from 'mysql2';
 
-interface ProductRow extends RowDataPacket {
+interface ProductRow {
     id: number;
     name: string;
     description: string;
@@ -13,36 +12,38 @@ interface ProductRow extends RowDataPacket {
     image: string;
     rating: number;
     reviews: number;
-    inStock: boolean | number;
-    featured: boolean | number;
-    is_new: boolean | number;
+    inStock: boolean;
+    featured: boolean;
+    is_new: boolean;
     dim_width: number | null;
     dim_height: number | null;
     dim_depth: number | null;
+    stock: number | null;
 }
 
 async function getColorsForProduct(productId: number): Promise<string[]> {
-    const [rows] = await pool.query<RowDataPacket[]>(
-        'SELECT color FROM producto_colores WHERE producto_id = ?',
-        [productId]
-    );
-    return rows.map((r: RowDataPacket) => r.color);
+    const { data } = await supabase
+        .from('producto_colores')
+        .select('color')
+        .eq('producto_id', productId);
+    return (data || []).map(r => r.color);
 }
 
 async function getMaterialsForProduct(productId: number): Promise<string[]> {
-    const [rows] = await pool.query<RowDataPacket[]>(
-        'SELECT material FROM producto_materiales WHERE producto_id = ?',
-        [productId]
-    );
-    return rows.map((r: RowDataPacket) => r.material);
+    const { data } = await supabase
+        .from('producto_materiales')
+        .select('material')
+        .eq('producto_id', productId);
+    return (data || []).map(r => r.material);
 }
 
 async function getImagesForProduct(productId: number): Promise<string[]> {
-    const [rows] = await pool.query<RowDataPacket[]>(
-        'SELECT image_url FROM producto_imagenes WHERE producto_id = ? ORDER BY sort_order ASC',
-        [productId]
-    );
-    return rows.map((r: RowDataPacket) => r.image_url);
+    const { data } = await supabase
+        .from('producto_imagenes')
+        .select('image_url')
+        .eq('producto_id', productId)
+        .order('sort_order', { ascending: true });
+    return (data || []).map(r => r.image_url);
 }
 
 async function mapRowToProduct(row: ProductRow): Promise<Product> {
@@ -52,7 +53,6 @@ async function mapRowToProduct(row: ProductRow): Promise<Product> {
         getImagesForProduct(row.id),
     ]);
 
-    // Combine the main image with extra images
     const allImages = row.image ? [row.image, ...extraImages] : extraImages;
 
     return {
@@ -76,6 +76,7 @@ async function mapRowToProduct(row: ProductRow): Promise<Product> {
         dimensions: (row.dim_width != null && row.dim_height != null && row.dim_depth != null)
             ? { width: Number(row.dim_width), height: Number(row.dim_height), depth: Number(row.dim_depth) }
             : null,
+        stock: row.stock != null ? Number(row.stock) : undefined,
     };
 }
 
@@ -85,37 +86,41 @@ async function mapRowsToProducts(rows: ProductRow[]): Promise<Product[]> {
 
 export const ProductsService = {
     async getAll(): Promise<Product[]> {
-        const [rows] = await pool.query<ProductRow[]>('SELECT * FROM productos');
-        return mapRowsToProducts(rows);
+        const { data, error } = await supabase.from('productos').select('*');
+        if (error) throw error;
+        return mapRowsToProducts(data || []);
     },
 
     async getFeatured(): Promise<Product[]> {
-        const [rows] = await pool.query<ProductRow[]>('SELECT * FROM productos WHERE featured = 1');
-        return mapRowsToProducts(rows);
+        const { data, error } = await supabase.from('productos').select('*').eq('featured', true);
+        if (error) throw error;
+        return mapRowsToProducts(data || []);
     },
 
     async getNew(): Promise<Product[]> {
-        const [rows] = await pool.query<ProductRow[]>('SELECT * FROM productos WHERE is_new = 1');
-        return mapRowsToProducts(rows);
+        const { data, error } = await supabase.from('productos').select('*').eq('is_new', true);
+        if (error) throw error;
+        return mapRowsToProducts(data || []);
     },
 
     async getByCategory(category: string): Promise<Product[]> {
-        const [rows] = await pool.query<ProductRow[]>('SELECT * FROM productos WHERE category = ?', [category]);
-        return mapRowsToProducts(rows);
+        const { data, error } = await supabase.from('productos').select('*').eq('category', category);
+        if (error) throw error;
+        return mapRowsToProducts(data || []);
     },
 
     async getById(id: string): Promise<Product | undefined> {
-        const [rows] = await pool.query<ProductRow[]>('SELECT * FROM productos WHERE id = ?', [id]);
-        if (rows.length === 0) return undefined;
-        return mapRowToProduct(rows[0]);
+        const { data, error } = await supabase.from('productos').select('*').eq('id', id).single();
+        if (error || !data) return undefined;
+        return mapRowToProduct(data);
     },
 
     async search(query: string): Promise<Product[]> {
-        const searchTerm = `%${query}%`;
-        const [rows] = await pool.query<ProductRow[]>(
-            'SELECT * FROM productos WHERE name LIKE ? OR description LIKE ? OR category LIKE ? OR subcategory LIKE ?',
-            [searchTerm, searchTerm, searchTerm, searchTerm]
-        );
-        return mapRowsToProducts(rows);
+        const { data, error } = await supabase
+            .from('productos')
+            .select('*')
+            .or(`name.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%,subcategory.ilike.%${query}%`);
+        if (error) throw error;
+        return mapRowsToProducts(data || []);
     }
 };
