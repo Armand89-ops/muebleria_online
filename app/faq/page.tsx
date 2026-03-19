@@ -7,9 +7,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 
 const faqCategories = [
   {
@@ -97,8 +97,8 @@ const faqCategories = [
 export default function FaqPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Breadcrumb */}

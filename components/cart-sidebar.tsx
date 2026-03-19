@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react'
@@ -14,14 +13,7 @@ import {
 } from '@/components/ui/sheet'
 
 export function CartSidebar() {
-  const [mounted, setMounted] = useState(false)
   const { items, removeItem, updateQuantity, totalPrice, isOpen, closeCart } = useCart()
-  
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-  
-  if (!mounted) return null
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-MX', {

@@ -1,9 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronRight, Award, Leaf, Heart, Users } from 'lucide-react'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 
 const values = [
   {
@@ -45,8 +45,8 @@ const team = [
 export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Breadcrumb */}

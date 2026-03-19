@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { ChevronRight, Tag, Clock, Percent, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 import { ProductCard } from '@/components/product-card'
 import type { Product } from '@/lib/products'
 
@@ -51,8 +51,8 @@ export default function OfertasPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Breadcrumb */}

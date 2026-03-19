@@ -22,9 +22,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 import { ProductCard } from '@/components/product-card'
 import { categories } from '@/lib/products'
 import type { Product } from '@/lib/products'
@@ -298,8 +298,8 @@ export default function CatalogoPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Page Header */}

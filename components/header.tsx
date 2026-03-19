@@ -1,7 +1,6 @@
 "use client"
 
 import React from "react"
-import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useState } from 'react'
 import { Search, ShoppingBag, Menu, X, User, Heart, LogIn } from 'lucide-react'
@@ -11,16 +10,11 @@ import { useCart } from '@/context/cart-context'
 import { useWishlist } from '@/context/wishlist-context'
 import { useAuth } from '@/context/auth-context'
 import { useRouter } from 'next/navigation'
-
-const MobileMenu = dynamic(() => import('@/components/mobile-menu').then(mod => mod.MobileMenu), {
-  ssr: false,
-  loading: () => (
-    <Button variant="ghost" size="icon" className="mr-2 lg:hidden">
-      <Menu className="h-5 w-5" />
-      <span className="sr-only">Abrir menú</span>
-    </Button>
-  )
-})
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 
 const navigation = [
   { name: 'Inicio', href: '/' },
@@ -55,7 +49,54 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Mobile menu */}
-          <MobileMenu />
+          <Sheet>
+            <SheetTrigger asChild className="lg:hidden">
+              <Button variant="ghost" size="icon" className="mr-2">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Abrir menú</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] sm:w-[350px]">
+              <nav className="flex flex-col gap-4 mt-8">
+                {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="text-lg font-medium text-foreground hover:text-accent transition-colors py-2"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+                <div className="border-t border-border pt-4 mt-2">
+                  {isAuthenticated ? (
+                    <>
+                      <Link href="/cuenta" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                        <User className="h-5 w-5" /> {user?.nombre || 'Mi Cuenta'}
+                      </Link>
+                      <Link href="/cuenta?tab=favoritos" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                        <Heart className="h-5 w-5" /> Favoritos
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/login" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                        <LogIn className="h-5 w-5" /> Iniciar Sesión
+                      </Link>
+                      <Link href="/registro" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                        <User className="h-5 w-5" /> Crear Cuenta
+                      </Link>
+                    </>
+                  )}
+                  <Link href="/contacto" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                    Contacto
+                  </Link>
+                  <Link href="/faq" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                    Ayuda
+                  </Link>
+                </div>
+              </nav>
+            </SheetContent>
+          </Sheet>
 
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">

@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 
 const contactInfo = [
   {
@@ -109,8 +109,8 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Breadcrumb */}

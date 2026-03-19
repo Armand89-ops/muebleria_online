@@ -2,9 +2,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 import { ProductCard } from '@/components/product-card'
 import { categories, products as fallbackProducts } from '@/lib/products'
 import { ProductsService } from './services/products.service'
@@ -24,8 +24,8 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Hero Section */}
