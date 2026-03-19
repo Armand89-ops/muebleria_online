@@ -25,7 +25,7 @@ export function CartSidebar() {
 
   return (
     <Sheet open={isOpen} onOpenChange={closeCart}>
-      <SheetContent className="w-full sm:max-w-lg flex flex-col">
+      <SheetContent className="w-full sm:max-w-lg flex flex-col" suppressHydrationWarning>
         <SheetHeader>
           <SheetTitle className="font-serif text-xl">Tu Carrito</SheetTitle>
         </SheetHeader>
