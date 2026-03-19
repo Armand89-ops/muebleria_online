@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useEffect } from "react"
 
 import Link from 'next/link'
 import { useState } from 'react'
@@ -31,10 +31,15 @@ const navigation = [
 export function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { totalItems, openCart } = useCart()
   const { totalItems: wishlistTotal } = useWishlist()
   const { user, isAuthenticated } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,54 +55,61 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Mobile menu */}
-          <Sheet>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon" className="mr-2">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Abrir menú</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[350px]">
-              <nav className="flex flex-col gap-4 mt-8">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="text-lg font-medium text-foreground hover:text-accent transition-colors py-2"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-                <div className="border-t border-border pt-4 mt-2">
-                  {isAuthenticated ? (
-                    <>
-                      <Link href="/cuenta" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                        <User className="h-5 w-5" /> {user?.nombre || 'Mi Cuenta'}
-                      </Link>
-                      <Link href="/cuenta?tab=favoritos" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                        <Heart className="h-5 w-5" /> Favoritos
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <Link href="/login" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                        <LogIn className="h-5 w-5" /> Iniciar Sesión
-                      </Link>
-                      <Link href="/registro" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                        <User className="h-5 w-5" /> Crear Cuenta
-                      </Link>
-                    </>
-                  )}
-                  <Link href="/contacto" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                    Contacto
-                  </Link>
-                  <Link href="/faq" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                    Ayuda
-                  </Link>
-                </div>
-              </nav>
-            </SheetContent>
-          </Sheet>
+          {mounted ? (
+            <Sheet>
+              <SheetTrigger asChild className="lg:hidden">
+                <Button variant="ghost" size="icon" className="mr-2">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Abrir menú</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[350px]">
+                <nav className="flex flex-col gap-4 mt-8">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="text-lg font-medium text-foreground hover:text-accent transition-colors py-2"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                  <div className="border-t border-border pt-4 mt-2">
+                    {isAuthenticated ? (
+                      <>
+                        <Link href="/cuenta" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                          <User className="h-5 w-5" /> {user?.nombre || 'Mi Cuenta'}
+                        </Link>
+                        <Link href="/cuenta?tab=favoritos" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                          <Heart className="h-5 w-5" /> Favoritos
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/login" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                          <LogIn className="h-5 w-5" /> Iniciar Sesión
+                        </Link>
+                        <Link href="/registro" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                          <User className="h-5 w-5" /> Crear Cuenta
+                        </Link>
+                      </>
+                    )}
+                    <Link href="/contacto" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                      Contacto
+                    </Link>
+                    <Link href="/faq" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                      Ayuda
+                    </Link>
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          ) : (
+            <Button variant="ghost" size="icon" className="mr-2 lg:hidden">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Abrir menú</span>
+            </Button>
+          )}
 
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
