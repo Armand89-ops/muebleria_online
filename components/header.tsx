@@ -51,7 +51,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Mobile menu */}
           <Sheet>
-            <SheetTrigger asChild className="lg:hidden">
+            <SheetTrigger asChild className="lg:hidden" suppressHydrationWarning>
               <Button variant="ghost" size="icon" className="mr-2">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Abrir menú</span>
