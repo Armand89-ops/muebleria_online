@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, User, Heart, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -22,7 +23,21 @@ const navigation = [
 ]
 
 export function MobileMenu() {
+  const [mounted, setMounted] = useState(false)
   const { user, isAuthenticated } = useAuth()
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  if (!mounted) {
+    return (
+      <Button variant="ghost" size="icon" className="mr-2 lg:hidden">
+        <Menu className="h-5 w-5" />
+        <span className="sr-only">Abrir menú</span>
+      </Button>
+    )
+  }
 
   return (
     <Sheet>
