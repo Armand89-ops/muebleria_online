@@ -7,14 +7,25 @@ import { Button } from '@/components/ui/button'
 import { useCart } from '@/context/cart-context'
 import { useWishlist } from '@/context/wishlist-context'
 import type { Product } from '@/lib/products'
+import { useContext } from 'react'
+import { CartContext } from '@/context/cart-context'
+import { WishlistContext } from '@/context/wishlist-context'
 
 interface ProductCardProps {
   product: Product
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addItem } = useCart()
-  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist()
+  const cartContext = useContext(CartContext)
+  const wishlistContext = useContext(WishlistContext)
+  
+  // Fallback if context not available
+  if (!cartContext || !wishlistContext) {
+    return null
+  }
+  
+  const { addItem } = cartContext
+  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = wishlistContext
   const isFavorite = isInWishlist(product.id)
 
   const toggleWishlist = () => {

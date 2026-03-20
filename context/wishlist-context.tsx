@@ -14,6 +14,8 @@ interface WishlistContextType {
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined)
 
+export { WishlistContext }
+
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<Product[]>([])
   const { isAuthenticated } = useAuth()
