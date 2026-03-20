@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
 
-export default function VerificarEmailPage() {
+function VerificarEmailContent() {
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
@@ -101,5 +101,30 @@ export default function VerificarEmailPage() {
 
       <Footer />
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <ClientHeader />
+      <main className="flex-1 flex items-center justify-center py-16">
+        <div className="max-w-md w-full mx-auto px-4">
+          <div className="bg-card rounded-lg border border-border p-8 text-center">
+            <Loader2 className="h-16 w-16 text-accent animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Cargando...</p>
+          </div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
+export default function VerificarEmailPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <VerificarEmailContent />
+    </Suspense>
   )
 }
