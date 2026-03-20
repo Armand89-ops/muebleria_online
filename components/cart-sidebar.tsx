@@ -11,6 +11,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
 } from '@/components/ui/sheet'
 
 export function CartSidebar() {
@@ -36,6 +37,7 @@ export function CartSidebar() {
       <SheetContent className="w-full sm:max-w-lg flex flex-col">
         <SheetHeader>
           <SheetTitle className="font-serif text-xl">Tu Carrito</SheetTitle>
+          <SheetDescription className="sr-only">Tu carrito de compras</SheetDescription>
         </SheetHeader>
 
         {items.length === 0 ? (

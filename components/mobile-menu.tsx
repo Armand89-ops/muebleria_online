@@ -19,7 +19,6 @@ const navigation = [
   { name: 'Dormitorio', href: '/catalogo?category=bedroom' },
   { name: 'Oficina', href: '/catalogo?category=office' },
   { name: 'Ofertas', href: '/ofertas' },
-  { name: 'Nosotros', href: '/nosotros' },
 ]
 
 export function MobileMenu() {

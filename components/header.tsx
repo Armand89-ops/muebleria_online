@@ -13,6 +13,8 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
+  SheetTitle,
+  SheetDescription,
 } from '@/components/ui/sheet'
 
 const navigation = [
@@ -23,7 +25,6 @@ const navigation = [
   { name: 'Dormitorio', href: '/catalogo?category=bedroom' },
   { name: 'Oficina', href: '/catalogo?category=office' },
   { name: 'Ofertas', href: '/ofertas' },
-  { name: 'Nosotros', href: '/nosotros' },
 ]
 
 export function Header() {
@@ -62,6 +63,8 @@ export function Header() {
                 </Button>
               </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[350px]">
+              <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
+              <SheetDescription className="sr-only">Menú de navegación del sitio</SheetDescription>
               <nav className="flex flex-col gap-4 mt-8">
                 {navigation.map((item) => (
                   <Link
