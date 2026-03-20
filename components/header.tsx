@@ -1,8 +1,7 @@
 "use client"
 
-import React from "react"
+import React, { useState, useEffect } from "react"
 import Link from 'next/link'
-import { useState } from 'react'
 import { Search, ShoppingBag, Menu, X, User, Heart, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,10 +29,15 @@ const navigation = [
 export function Header() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showSearch, setShowSearch] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { totalItems, openCart } = useCart()
   const { totalItems: wishlistTotal } = useWishlist()
   const { user, isAuthenticated } = useAuth()
   const router = useRouter()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,13 +53,14 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Mobile menu */}
-          <Sheet>
-            <SheetTrigger asChild className="lg:hidden" suppressHydrationWarning>
-              <Button variant="ghost" size="icon" className="mr-2">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Abrir menú</span>
-              </Button>
-            </SheetTrigger>
+          {mounted ? (
+            <Sheet>
+              <SheetTrigger asChild className="lg:hidden">
+                <Button variant="ghost" size="icon" className="mr-2">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Abrir menú</span>
+                </Button>
+              </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[350px]">
               <nav className="flex flex-col gap-4 mt-8">
                 {navigation.map((item) => (
@@ -96,7 +101,13 @@ export function Header() {
                 </div>
               </nav>
             </SheetContent>
-          </Sheet>
+            </Sheet>
+          ) : (
+            <Button variant="ghost" size="icon" className="mr-2 lg:hidden">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Abrir menú</span>
+            </Button>
+          )}
 
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
