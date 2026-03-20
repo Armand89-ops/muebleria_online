@@ -2,9 +2,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 import { ProductCard } from '@/components/product-card'
 import { categories, products as fallbackProducts } from '@/lib/products'
 import { ProductsService } from './services/products.service'
@@ -24,8 +24,8 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -68,10 +68,8 @@ export default async function HomePage() {
         {/* Features */}
         <section className="py-12 bg-card border-y border-border">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
               {[
-                { title: 'Envío Gratis', desc: 'En pedidos mayores a $5,000' },
-                { title: 'Garantía 5 Años', desc: 'En todos nuestros productos' },
                 { title: 'Pago Seguro', desc: 'Transacciones encriptadas' },
                 { title: 'Atención 24/7', desc: 'Soporte personalizado' },
               ].map((feature) => (

@@ -7,9 +7,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 
 const faqCategories = [
   {
@@ -38,7 +38,7 @@ const faqCategories = [
     questions: [
       {
         q: 'Cual es el costo de envio?',
-        a: 'El envio estandar es gratuito en pedidos mayores a $5,000 MXN. Para pedidos menores, el costo se calcula segun la distancia y el peso del paquete. Tambien ofrecemos opciones de envio express.',
+        a: 'El costo de envio se calcula segun la distancia y el peso del paquete. Consulta las opciones disponibles durante el proceso de checkout. Tambien ofrecemos opciones de envio express.',
       },
       {
         q: 'Cuanto tiempo tarda la entrega?',
@@ -51,23 +51,6 @@ const faqCategories = [
       {
         q: 'Realizan envios a toda la Republica Mexicana?',
         a: 'Si, realizamos envios a todas las ciudades principales de Mexico. Para localidades remotas, consulta disponibilidad y tiempos de entrega con nuestro equipo de atencion al cliente.',
-      },
-    ],
-  },
-  {
-    title: 'Devoluciones y Garantia',
-    questions: [
-      {
-        q: 'Cual es la politica de devoluciones?',
-        a: 'Tienes 30 dias a partir de la entrega para devolver cualquier producto en su estado original. Nosotros cubrimos el costo del envio de devolucion y procesamos el reembolso en 5-10 dias habiles.',
-      },
-      {
-        q: 'Que cubre la garantia?',
-        a: 'Todos nuestros muebles cuentan con 5 anos de garantia que cubre defectos de fabricacion y materiales. La garantia no cubre danos por uso inadecuado, exposicion a la intemperie o desgaste normal.',
-      },
-      {
-        q: 'Como inicio un proceso de devolucion?',
-        a: 'Contacta a nuestro equipo de atencion al cliente con tu numero de pedido. Programaremos la recoleccion del producto y una vez recibido en buen estado, procesaremos tu reembolso al metodo de pago original.',
       },
     ],
   },
@@ -97,8 +80,8 @@ const faqCategories = [
 export default function FaqPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Breadcrumb */}

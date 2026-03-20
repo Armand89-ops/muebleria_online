@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
-import { Header } from '@/components/header'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientHeader } from '@/components/client-header'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 import { useCart } from '@/context/cart-context'
 import { useOrders } from '@/context/orders-context'
 import { useAuth } from '@/context/auth-context'
@@ -214,8 +214,8 @@ export default function CheckoutPage() {
   if (items.length === 0 && !orderPlaced) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
-        <CartSidebar />
+        <ClientHeader />
+        <ClientCartSidebar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center py-16">
             <h1 className="font-serif text-2xl font-bold mb-4">Tu carrito está vacío</h1>
@@ -234,8 +234,8 @@ export default function CheckoutPage() {
   if (step === 'confirmation') {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
-        <CartSidebar />
+        <ClientHeader />
+        <ClientCartSidebar />
         <main className="flex-1 flex items-center justify-center py-16">
           <div className="text-center max-w-md mx-auto px-4">
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
@@ -268,8 +268,8 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Back Link */}

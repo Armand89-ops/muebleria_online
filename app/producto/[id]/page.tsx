@@ -8,9 +8,9 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Star, Minus, Plus, Truck, Shield, RotateCcw, ChevronRight, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 import { ProductCard } from '@/components/product-card'
 import { useCart } from '@/context/cart-context'
 import { useWishlist } from '@/context/wishlist-context'
@@ -74,8 +74,8 @@ export default function ProductPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
-        <CartSidebar />
+        <ClientHeader />
+        <ClientCartSidebar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <p className="text-muted-foreground">Cargando producto...</p>
@@ -89,8 +89,8 @@ export default function ProductPage() {
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
-        <CartSidebar />
+        <ClientHeader />
+        <ClientCartSidebar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="font-serif text-3xl font-bold text-foreground">Producto no encontrado</h1>
@@ -155,8 +155,8 @@ export default function ProductPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Breadcrumb */}
@@ -356,26 +356,12 @@ export default function ProductPage() {
                 </div>
 
                 {/* Features */}
-                <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
-                    <Truck className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Envío Gratis</p>
-                      <p className="text-xs text-muted-foreground">En pedidos +$5,000</p>
-                    </div>
-                  </div>
+                <div className="mt-10 grid grid-cols-1 sm:grid-cols-1 gap-4">
                   <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
                     <Shield className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">Garantía</p>
-                      <p className="text-xs text-muted-foreground">5 años de cobertura</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
-                    <RotateCcw className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Devoluciones</p>
-                      <p className="text-xs text-muted-foreground">30 días para devolver</p>
+                      <p className="text-sm font-medium">Pago Seguro</p>
+                      <p className="text-xs text-muted-foreground">Transacciones encriptadas</p>
                     </div>
                   </div>
                 </div>

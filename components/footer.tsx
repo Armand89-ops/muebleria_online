@@ -10,8 +10,7 @@ const footerLinks = {
     { name: 'Dormitorio', href: '/catalogo?category=bedroom' },
     { name: 'Oficina', href: '/catalogo?category=office' },
   ],
-  empresa: [
-    { name: 'Sobre Nosotros', href: '/nosotros' },
+  enlaces: [
     { name: 'Contacto', href: '/contacto' },
     { name: 'Preguntas Frecuentes', href: '/faq' },
     { name: 'Ofertas', href: '/ofertas' },
@@ -20,7 +19,7 @@ const footerLinks = {
     { name: 'Mi Cuenta', href: '/cuenta' },
     { name: 'Mis Pedidos', href: '/cuenta' },
     { name: 'Envios y Entregas', href: '/faq' },
-    { name: 'Devoluciones y Garantia', href: '/faq' },
+    { name: 'Contacto', href: '/contacto' },
   ],
 }
 
@@ -115,9 +114,9 @@ export function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">Empresa</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider mb-4">Enlaces</h3>
             <ul className="space-y-3">
-              {footerLinks.empresa.map((link) => (
+              {footerLinks.enlaces.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}

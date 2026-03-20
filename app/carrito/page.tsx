@@ -8,9 +8,9 @@ import { Minus, Plus, Trash2, ChevronRight, ShoppingBag, ArrowRight, Truck, Shie
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 import { ProductCard } from '@/components/product-card'
 import { useCart } from '@/context/cart-context'
 import type { Product } from '@/lib/products'
@@ -39,8 +39,8 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Header />
-        <CartSidebar />
+        <ClientHeader />
+        <ClientCartSidebar />
         <main className="flex-1 flex items-center justify-center py-16">
           <div className="text-center max-w-md mx-auto px-4">
             <ShoppingBag className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
@@ -63,8 +63,8 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <CartSidebar />
+      <ClientHeader />
+      <ClientCartSidebar />
 
       <main className="flex-1">
         {/* Breadcrumb */}

@@ -7,9 +7,9 @@ import { Eye, EyeOff, LogIn, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Header } from '@/components/header'
+import { ClientHeader } from '@/components/client-header'
 import { Footer } from '@/components/footer'
-import { CartSidebar } from '@/components/cart-sidebar'
+import { ClientCartSidebar } from '@/components/client-cart-sidebar'
 import { useAuth } from '@/context/auth-context'
 
 export default function LoginPage() {
@@ -52,8 +52,8 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <Header />
-            <CartSidebar />
+            <ClientHeader />
+            <ClientCartSidebar />
 
             <main className="flex-1 flex items-center justify-center py-12 px-4">
                 <div className="w-full max-w-md">
