@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/db';
 import { hashPassword, generateToken, setAuthCookie } from '@/lib/auth';
+import crypto from 'crypto';
 
 export async function POST(request: Request) {
     try {
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
         const password_hash = await hashPassword(password);
         const { data: newUser, error } = await supabase
             .from('usuarios')
-            .insert({ nombre, apellido, email, password_hash })
+            .insert({ nombre, apellido, email, password_hash, email_verificado: false })
             .select('id')
             .single();
 
@@ -51,6 +52,29 @@ export async function POST(request: Request) {
             );
         }
 
+        // Generar token de verificación de email
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const expiraAt = new Date();
+        expiraAt.setHours(expiraAt.getHours() + 24); // 24 horas
+
+        await supabase.from('tokens_auth').insert({
+            usuario_id: newUser.id,
+            token: verificationToken,
+            tipo: 'verificacion',
+            expira_at: expiraAt.toISOString()
+        });
+
+        // Construir URL de verificación
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const verificationUrl = `${baseUrl}/verificar-email?token=${verificationToken}`;
+
+        // Log para desarrollo (en producción enviarías el email)
+        console.log('===========================================');
+        console.log('EMAIL DE VERIFICACIÓN');
+        console.log(`Para: ${email}`);
+        console.log(`Link: ${verificationUrl}`);
+        console.log('===========================================');
+
         // Generar token y cookie
         const token = generateToken({ userId: newUser.id, email });
         await setAuthCookie(token);
@@ -61,8 +85,10 @@ export async function POST(request: Request) {
                 nombre,
                 apellido,
                 email,
+                email_verificado: false
             },
-            message: 'Cuenta creada exitosamente',
+            message: 'Cuenta creada. Por favor verifica tu email.',
+            verificationUrl: process.env.NODE_ENV === 'development' ? verificationUrl : undefined
         }, { status: 201 });
 
     } catch (error) {

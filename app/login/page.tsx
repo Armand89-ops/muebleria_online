@@ -114,6 +114,15 @@ export default function LoginPage() {
                                 {fieldErrors.password && <p className="text-xs text-destructive mt-1">{fieldErrors.password}</p>}
                             </div>
 
+                            <div className="flex justify-end">
+                                <Link 
+                                    href="/olvide-contrasena" 
+                                    className="text-sm text-accent hover:underline"
+                                >
+                                    ¿Olvidaste tu contraseña?
+                                </Link>
+                            </div>
+
                             <Button type="submit" className="w-full" size="lg" disabled={loading}>
                                 {loading ? 'Ingresando...' : 'Iniciar Sesión'}
                                 {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
