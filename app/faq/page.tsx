@@ -55,23 +55,6 @@ const faqCategories = [
     ],
   },
   {
-    title: 'Devoluciones y Garantia',
-    questions: [
-      {
-        q: 'Cual es la politica de devoluciones?',
-        a: 'Tienes 30 dias a partir de la entrega para devolver cualquier producto en su estado original. Nosotros cubrimos el costo del envio de devolucion y procesamos el reembolso en 5-10 dias habiles.',
-      },
-      {
-        q: 'Que cubre la garantia?',
-        a: 'Nuestros muebles cuentan con garantia que cubre defectos de fabricacion y materiales. La garantia no cubre danos por uso inadecuado, exposicion a la intemperie o desgaste normal. Consulta los terminos especificos de cada producto.',
-      },
-      {
-        q: 'Como inicio un proceso de devolucion?',
-        a: 'Contacta a nuestro equipo de atencion al cliente con tu numero de pedido. Programaremos la recoleccion del producto y una vez recibido en buen estado, procesaremos tu reembolso al metodo de pago original.',
-      },
-    ],
-  },
-  {
     title: 'Productos y Cuidado',
     questions: [
       {

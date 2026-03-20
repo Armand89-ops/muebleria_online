@@ -19,7 +19,7 @@ const footerLinks = {
     { name: 'Mi Cuenta', href: '/cuenta' },
     { name: 'Mis Pedidos', href: '/cuenta' },
     { name: 'Envios y Entregas', href: '/faq' },
-    { name: 'Devoluciones y Garantia', href: '/faq' },
+    { name: 'Contacto', href: '/contacto' },
   ],
 }
 

@@ -14,7 +14,6 @@ import {
   SheetContent,
   SheetTrigger,
   SheetTitle,
-  SheetDescription,
 } from '@/components/ui/sheet'
 
 const navigation = [
@@ -56,16 +55,15 @@ export function Header() {
           {/* Mobile menu */}
           {mounted && (
             <Sheet>
-              <SheetTrigger asChild className="lg:hidden">
-                <Button variant="ghost" size="icon" className="mr-2">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Abrir menú</span>
-                </Button>
-              </SheetTrigger>
+            <SheetTrigger asChild className="lg:hidden">
+              <Button variant="ghost" size="icon" className="mr-2" suppressHydrationWarning>
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Abrir menú</span>
+              </Button>
+            </SheetTrigger>
             <SheetContent side="left" className="w-[300px] sm:w-[350px]">
-              <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
-              <SheetDescription className="sr-only">Menú de navegación del sitio</SheetDescription>
-              <nav className="flex flex-col gap-4 mt-8">
+              <SheetTitle className="text-lg font-semibold mb-6">Menú</SheetTitle>
+              <nav className="flex flex-col gap-4">
                 {navigation.map((item) => (
                   <Link
                     key={item.name}

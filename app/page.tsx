@@ -68,11 +68,10 @@ export default async function HomePage() {
         {/* Features */}
         <section className="py-12 bg-card border-y border-border">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
               {[
                 { title: 'Pago Seguro', desc: 'Transacciones encriptadas' },
                 { title: 'Atención 24/7', desc: 'Soporte personalizado' },
-                { title: 'Devoluciones', desc: '30 días para devolver' },
               ].map((feature) => (
                 <div key={feature.title} className="text-center">
                   <h3 className="font-medium text-card-foreground">{feature.title}</h3>
