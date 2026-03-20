@@ -54,7 +54,7 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Mobile menu */}
-          {mounted ? (
+          {mounted && (
             <Sheet>
               <SheetTrigger asChild className="lg:hidden">
                 <Button variant="ghost" size="icon" className="mr-2">
@@ -105,11 +105,6 @@ export function Header() {
               </nav>
             </SheetContent>
             </Sheet>
-          ) : (
-            <Button variant="ghost" size="icon" className="mr-2 lg:hidden">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Abrir menú</span>
-            </Button>
           )}
 
           {/* Logo */}

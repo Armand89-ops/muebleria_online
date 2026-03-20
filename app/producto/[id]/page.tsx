@@ -356,26 +356,19 @@ export default function ProductPage() {
                 </div>
 
                 {/* Features */}
-                <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
-                    <Truck className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Envío Gratis</p>
-                      <p className="text-xs text-muted-foreground">En pedidos +$5,000</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
-                    <Shield className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Garantía</p>
-                      <p className="text-xs text-muted-foreground">5 años de cobertura</p>
-                    </div>
-                  </div>
+                <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
                     <RotateCcw className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium">Devoluciones</p>
                       <p className="text-xs text-muted-foreground">30 días para devolver</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">Pago Seguro</p>
+                      <p className="text-xs text-muted-foreground">Transacciones encriptadas</p>
                     </div>
                   </div>
                 </div>

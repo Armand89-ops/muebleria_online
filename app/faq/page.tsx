@@ -38,7 +38,7 @@ const faqCategories = [
     questions: [
       {
         q: 'Cual es el costo de envio?',
-        a: 'El envio estandar es gratuito en pedidos mayores a $5,000 MXN. Para pedidos menores, el costo se calcula segun la distancia y el peso del paquete. Tambien ofrecemos opciones de envio express.',
+        a: 'El costo de envio se calcula segun la distancia y el peso del paquete. Consulta las opciones disponibles durante el proceso de checkout. Tambien ofrecemos opciones de envio express.',
       },
       {
         q: 'Cuanto tiempo tarda la entrega?',
@@ -63,7 +63,7 @@ const faqCategories = [
       },
       {
         q: 'Que cubre la garantia?',
-        a: 'Todos nuestros muebles cuentan con 5 anos de garantia que cubre defectos de fabricacion y materiales. La garantia no cubre danos por uso inadecuado, exposicion a la intemperie o desgaste normal.',
+        a: 'Nuestros muebles cuentan con garantia que cubre defectos de fabricacion y materiales. La garantia no cubre danos por uso inadecuado, exposicion a la intemperie o desgaste normal. Consulta los terminos especificos de cada producto.',
       },
       {
         q: 'Como inicio un proceso de devolucion?',
