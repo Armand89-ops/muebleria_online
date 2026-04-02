@@ -33,7 +33,7 @@ CREATE INDEX IF NOT EXISTS idx_notificaciones_admin_creado ON notificaciones_adm
 -- =============================================
 CREATE TABLE IF NOT EXISTS historial_pedidos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  pedido_id UUID NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+  pedido_id INT NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
   estado_anterior VARCHAR(50),
   estado_nuevo VARCHAR(50) NOT NULL,
   comentario TEXT,
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS cupones_usados (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   cupon_id UUID NOT NULL REFERENCES cupones(id) ON DELETE CASCADE,
   usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-  pedido_id UUID REFERENCES pedidos(id) ON DELETE SET NULL,
+  pedido_id INT REFERENCES pedidos(id) ON DELETE SET NULL,
   descuento_aplicado DECIMAL(10, 2) NOT NULL,
   usado_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(cupon_id, usuario_id, pedido_id)
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS movimientos_inventario (
   cantidad_anterior INT,
   cantidad_nueva INT,
   razon TEXT, -- 'venta', 'devolucion', 'ajuste_manual', 'restock'
-  referencia_id UUID, -- pedido_id si es venta
+  referencia_id INT, -- pedido_id si es venta
   usuario_id UUID REFERENCES usuarios(id), -- Quien hizo el movimiento
   creado_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
