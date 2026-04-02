@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS historial_pedidos (
   estado_anterior VARCHAR(50),
   estado_nuevo VARCHAR(50) NOT NULL,
   comentario TEXT,
-  cambiado_por UUID REFERENCES usuarios(id), -- Admin que hizo el cambio
+  cambiado_por INT REFERENCES usuarios(id), -- Admin que hizo el cambio
   creado_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -100,7 +100,7 @@ CREATE INDEX IF NOT EXISTS idx_cupones_activo ON cupones(activo);
 CREATE TABLE IF NOT EXISTS cupones_usados (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   cupon_id UUID NOT NULL REFERENCES cupones(id) ON DELETE CASCADE,
-  usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  usuario_id INT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
   pedido_id INT REFERENCES pedidos(id) ON DELETE SET NULL,
   descuento_aplicado DECIMAL(10, 2) NOT NULL,
   usado_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS movimientos_inventario (
   cantidad_nueva INT,
   razon TEXT, -- 'venta', 'devolucion', 'ajuste_manual', 'restock'
   referencia_id INT, -- pedido_id si es venta
-  usuario_id UUID REFERENCES usuarios(id), -- Quien hizo el movimiento
+  usuario_id INT REFERENCES usuarios(id), -- Quien hizo el movimiento
   creado_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -172,7 +172,7 @@ ON CONFLICT (slug) DO NOTHING;
 -- =============================================
 CREATE TABLE IF NOT EXISTS sesiones_admin (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  usuario_id INT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
   token_hash VARCHAR(255) NOT NULL,
   ip_address VARCHAR(45),
   user_agent TEXT,
@@ -188,7 +188,7 @@ CREATE INDEX IF NOT EXISTS idx_sesiones_expira ON sesiones_admin(expira_at);
 -- =============================================
 CREATE TABLE IF NOT EXISTS logs_admin (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  usuario_id UUID REFERENCES usuarios(id) ON DELETE SET NULL,
+  usuario_id INT REFERENCES usuarios(id) ON DELETE SET NULL,
   accion VARCHAR(100) NOT NULL, -- 'crear_producto', 'editar_pedido', 'eliminar_usuario', etc.
   entidad VARCHAR(50), -- 'producto', 'pedido', 'usuario', etc.
   entidad_id UUID,
