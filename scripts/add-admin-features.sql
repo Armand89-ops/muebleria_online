@@ -112,10 +112,10 @@ CREATE TABLE IF NOT EXISTS cupones_usados (
 -- =============================================
 CREATE TABLE IF NOT EXISTS inventario (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  producto_id UUID NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
+  producto_id INT NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
   cantidad INT NOT NULL DEFAULT 0,
   stock_minimo INT DEFAULT 5,
-  ubicacion VARCHAR(100), -- Ubicación en almacén
+  ubicacion VARCHAR(100), -- Ubicacion en almacen
   actualizado_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(producto_id)
 );
@@ -127,7 +127,7 @@ CREATE INDEX IF NOT EXISTS idx_inventario_producto ON inventario(producto_id);
 -- =============================================
 CREATE TABLE IF NOT EXISTS movimientos_inventario (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  producto_id UUID NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
+  producto_id INT NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
   tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('entrada', 'salida', 'ajuste')),
   cantidad INT NOT NULL,
   cantidad_anterior INT,
