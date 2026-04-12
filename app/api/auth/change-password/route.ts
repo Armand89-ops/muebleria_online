@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/db'
-import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@/lib/db';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'tu-secreto-muy-seguro'
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.split(' ')[1]
     let decoded: { userId: number }
-    
+
     try {
       decoded = jwt.verify(token, JWT_SECRET) as { userId: number }
     } catch {
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Obtener usuario
-    const { data: usuario, error: userError } = await supabase
+    const { data: usuario, error: userError } = await supabaseAdmin
       .from('usuarios')
       .select('id, password_hash')
       .eq('id', decoded.userId)
@@ -72,9 +72,9 @@ export async function POST(request: NextRequest) {
     const newPasswordHash = await bcrypt.hash(newPassword, 10)
 
     // Actualizar contraseña
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('usuarios')
-      .update({ 
+      .update({
         password_hash: newPasswordHash,
         updated_at: new Date().toISOString()
       })
@@ -88,9 +88,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: 'Contraseña actualizada correctamente' 
+      message: 'Contraseña actualizada correctamente'
     })
   } catch (error) {
     console.error('Error cambiando contraseña:', error)
