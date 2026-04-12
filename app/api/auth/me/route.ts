@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/db';
+import { supabaseAdmin } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 
 export async function GET() {
     try {
         const authUser = await getCurrentUser();
+        console.log('authUser:', authUser);
 
         if (!authUser) {
             return NextResponse.json(
@@ -13,7 +14,7 @@ export async function GET() {
             );
         }
 
-        const { data: user, error } = await supabase
+        const { data: user, error } = await supabaseAdmin
             .from('usuarios')
             .select('id, nombre, apellido, email, telefono, created_at')
             .eq('id', authUser.userId)
