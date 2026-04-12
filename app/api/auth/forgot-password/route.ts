@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/db'
+import { supabase } from '@/lib/db'
 import crypto from 'crypto'
 
 function generateToken(): string {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar usuario
-    const { data: usuario, error: userError } = await supabaseAdmin
+    const { data: usuario, error: userError } = await supabase
       .from('usuarios')
       .select('id, nombre')
       .eq('email', email.toLowerCase())
@@ -27,9 +27,9 @@ export async function POST(request: NextRequest) {
 
     if (userError || !usuario) {
       // No revelar si el email existe o no (seguridad)
-      return NextResponse.json({
+      return NextResponse.json({ 
         success: true,
-        message: 'Si el email existe, recibirás instrucciones para restablecer tu contraseña'
+        message: 'Si el email existe, recibirás instrucciones para restablecer tu contraseña' 
       })
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     expiraAt.setHours(expiraAt.getHours() + 1) // Expira en 1 hora
 
     // Guardar token
-    const { error: tokenError } = await supabaseAdmin
+    const { error: tokenError } = await supabase
       .from('tokens_auth')
       .insert({
         usuario_id: usuario.id,
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     console.log(`Link: ${resetUrl}`)
     console.log('===========================================')
 
-    return NextResponse.json({
+    return NextResponse.json({ 
       success: true,
       message: 'Si el email existe, recibirás instrucciones para restablecer tu contraseña',
       // Solo para desarrollo

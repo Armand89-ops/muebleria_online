@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/db';
+import { supabase } from '@/lib/db';
 import { verifyPassword, generateToken, setAuthCookie } from '@/lib/auth';
 
 export async function POST(request: Request) {
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         }
 
         // Buscar usuario
-        const { data: user, error } = await supabaseAdmin
+        const { data: user, error } = await supabase
             .from('usuarios')
             .select('id, nombre, apellido, email, password_hash, telefono')
             .eq('email', email)
