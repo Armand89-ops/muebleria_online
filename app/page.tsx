@@ -15,7 +15,7 @@ export default async function HomePage() {
 
   try {
     featuredProducts = await ProductsService.getFeatured();
-    newProducts = await ProductsService.getAll();
+    newProducts = await ProductsService.getNew();
   } catch (error) {
     console.error('Error al conectar con la BD, usando datos de respaldo:', error);
     featuredProducts = fallbackProducts.filter(p => p.featured);
