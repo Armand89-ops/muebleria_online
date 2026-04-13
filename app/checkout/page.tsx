@@ -122,12 +122,26 @@ export default function CheckoutPage() {
   const total = subtotal + shippingCost + tax
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let { name, value } = e.target;
+
+    if (name === 'cardNumber') {
+      value = value.replace(/\D/g, '').substring(0, 16);
+    } else if (name === 'cvv') {
+      value = value.replace(/\D/g, '').substring(0, 4);
+    } else if (name === 'expiry') {
+      value = value.replace(/[^\d/]/g, '');
+      if (value.length === 2 && formData.expiry.length < 2 && !value.includes('/')) {
+        value += '/';
+      }
+      value = value.substring(0, 5);
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }))
-    if (fieldErrors[e.target.name]) {
-      setFieldErrors(prev => ({ ...prev, [e.target.name]: '' }))
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: '' }))
     }
   }
 
@@ -199,9 +213,19 @@ export default function CheckoutPage() {
         id = data.id || 'LUXE-ERROR'
       } catch {
         id = addOrder(orderData)
+        fetch('/api/products/reduce-stock', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: orderData.items }),
+        }).catch(() => {})
       }
     } else {
       id = addOrder(orderData)
+      fetch('/api/products/reduce-stock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: orderData.items }),
+      }).catch(() => {})
     }
 
     setOrderId(id)

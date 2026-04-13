@@ -60,7 +60,7 @@ export function OrdersProvider({ children }: { children: ReactNode }) {
                 reviews: 0,
                 inStock: true,
                 featured: false,
-                isNew: false,
+                is_new: false,
                 colors: [],
                 materials: [],
                 images: [],

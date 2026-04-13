@@ -44,11 +44,26 @@ export function ProductCard({ product }: ProductCardProps) {
     }).format(price)
   }
 
+  // Timer logic for 2 days
+  const isActuallyNew = () => {
+    if (!product.new && !product.is_new) return false;
+    
+    if (product.created_at) {
+      const createdDate = new Date(product.created_at).getTime();
+      const now = new Date().getTime();
+      const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
+      if (now - createdDate > twoDaysInMs) {
+        return false;
+      }
+    }
+    return true; // If no created_at, fallback to true if is_new is set
+  }
+
   return (
     <div className="group relative bg-card rounded-lg overflow-hidden border border-border hover:shadow-lg transition-all duration-300">
       {/* Badges */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-        {(product.new || product.is_new) && (
+        {isActuallyNew() && (
           <span className="px-2 py-1 bg-accent text-accent-foreground text-xs font-medium rounded">
             Nuevo
           </span>

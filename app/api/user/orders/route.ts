@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/db';
+import { supabase, supabaseAdmin } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 
 // GET - Obtener pedidos del usuario
@@ -9,7 +9,7 @@ export async function GET() {
 
     try {
         // Obtener pedidos
-        const { data: orders, error } = await supabase
+        const { data: orders, error } = await supabaseAdmin
             .from('pedidos')
             .select('*')
             .eq('usuario_id', authUser.userId)
@@ -19,7 +19,7 @@ export async function GET() {
 
         // Para cada pedido, obtener sus items
         for (const order of (orders || [])) {
-            const { data: items } = await supabase
+            const { data: items } = await supabaseAdmin
                 .from('pedido_items')
                 .select('producto_id, nombre_producto, precio, cantidad, color, imagen')
                 .eq('pedido_id', order.id);
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
             const productoId = item.product?.id || item.producto_id;
 
             if (productoId) {
-                const { data: product } = await supabase
+                const { data: product } = await supabaseAdmin
                     .from('productos')
                     .select('stock, "inStock"')
                     .eq('id', productoId)
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         }
 
         // Crear pedido
-        const { data: newOrder, error: orderError } = await supabase
+        const { data: newOrder, error: orderError } = await supabaseAdmin
             .from('pedidos')
             .insert({
                 usuario_id: authUser.userId,
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
             const qty = item.quantity || item.cantidad || 1;
             const productoId = item.product?.id || item.producto_id;
 
-            await supabase
+            await supabaseAdmin
                 .from('pedido_items')
                 .insert({
                     pedido_id: pedidoId,
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
 
             // Reducir stock y actualizar inStock
             if (productoId) {
-                const { data: currentProduct } = await supabase
+                const { data: currentProduct } = await supabaseAdmin
                     .from('productos')
                     .select('stock')
                     .eq('id', productoId)
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 
                 if (currentProduct && currentProduct.stock != null) {
                     const newStock = Math.max(currentProduct.stock - qty, 0);
-                    await supabase
+                    await supabaseAdmin
                         .from('productos')
                         .update({ stock: newStock, inStock: newStock > 0 })
                         .eq('id', productoId);
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
         }
 
         // Limpiar carrito del usuario
-        await supabase
+        await supabaseAdmin
             .from('usuario_carrito')
             .delete()
             .eq('usuario_id', authUser.userId);

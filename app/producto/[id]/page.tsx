@@ -197,7 +197,16 @@ export default function ProductPage() {
                     className="object-cover"
                     priority
                   />
-                  {(product.new || product.is_new) && (
+                  {(() => {
+                    if (!product.new && !product.is_new) return false;
+                    if (product.created_at) {
+                      const createdDate = new Date(product.created_at).getTime();
+                      const now = new Date().getTime();
+                      const twoDaysInMs = 2 * 24 * 60 * 60 * 1000;
+                      if (now - createdDate > twoDaysInMs) return false;
+                    }
+                    return true;
+                  })() && (
                     <span className="absolute top-4 left-4 px-3 py-1 bg-accent text-accent-foreground text-sm font-medium rounded">
                       Nuevo
                     </span>
