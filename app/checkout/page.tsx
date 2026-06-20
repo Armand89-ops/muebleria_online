@@ -17,6 +17,7 @@ import { useCart } from '@/context/cart-context'
 import { useOrders } from '@/context/orders-context'
 import { useAuth } from '@/context/auth-context'
 
+
 const shippingOptions = [
   { id: 'standard', name: 'Envío Estándar', price: 0, time: '5-7 días hábiles' },
   { id: 'express', name: 'Envío Express', price: 499, time: '2-3 días hábiles' },
@@ -26,11 +27,12 @@ const shippingOptions = [
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart()
   const { addOrder } = useOrders()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
   const [step, setStep] = useState<'shipping' | 'payment' | 'confirmation'>('shipping')
   const [shippingMethod, setShippingMethod] = useState('standard')
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [placing, setPlacing] = useState(false)
+  const [stripeLoading, setStripeLoading] = useState(false)
 
   // Saved addresses
   const [savedAddresses, setSavedAddresses] = useState<any[]>([])
@@ -214,18 +216,18 @@ export default function CheckoutPage() {
       } catch {
         id = addOrder(orderData)
         fetch('/api/products/reduce-stock', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: orderData.items }),
-        }).catch(() => {})
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: orderData.items }),
+        }).catch(() => { })
       }
     } else {
       id = addOrder(orderData)
       fetch('/api/products/reduce-stock', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: orderData.items }),
-      }).catch(() => {})
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: orderData.items }),
+      }).catch(() => { })
     }
 
     setOrderId(id)
@@ -233,6 +235,37 @@ export default function CheckoutPage() {
     setStep('confirmation')
     clearCart()
     setPlacing(false)
+  }
+
+  const handleStripeCheckout = async () => {
+    setStripeLoading(true)
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user?.id,
+          items: items.map(item => ({
+            name: item.product.name,
+            price: item.product.price,
+            quantity: item.quantity,
+            image: item.product.image,
+          })),
+          shipping: shippingCost,
+          shippingAddress: {
+            name: `${formData.firstName} ${formData.lastName}`,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zip,
+          }
+        })
+      })
+      const { url } = await res.json()
+      window.location.href = url
+    } catch {
+      setStripeLoading(false)
+    }
   }
 
   if (items.length === 0 && !orderPlaced) {
@@ -343,11 +376,8 @@ export default function CheckoutPage() {
                       <div>
                         <Label htmlFor="email">Correo Electrónico</Label>
                         <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
+                          id="email" name="email" type="email"
+                          value={formData.email} onChange={handleInputChange}
                           className={`mt-1 ${fieldErrors.email ? 'border-destructive' : ''}`}
                           placeholder="tu@email.com"
                         />
@@ -356,19 +386,15 @@ export default function CheckoutPage() {
                       <div>
                         <Label htmlFor="phone">Teléfono</Label>
                         <Input
-                          id="phone"
-                          name="phone"
-                          type="tel"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder="+52 55 1234 5678"
+                          id="phone" name="phone" type="tel"
+                          value={formData.phone} onChange={handleInputChange}
+                          className="mt-1" placeholder="+52 55 1234 5678"
                         />
                       </div>
                     </div>
                   </div>
 
-                  {/* Saved Addresses Selector */}
+                  {/* Saved Addresses */}
                   {isAuthenticated && savedAddresses.length > 0 && (
                     <div>
                       <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
@@ -391,9 +417,7 @@ export default function CheckoutPage() {
                               <div className="flex items-center gap-3">
                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedAddressId === addr.id ? 'border-primary' : 'border-muted-foreground/40'
                                   }`}>
-                                  {selectedAddressId === addr.id && (
-                                    <div className="w-2 h-2 rounded-full bg-primary" />
-                                  )}
+                                  {selectedAddressId === addr.id && <div className="w-2 h-2 rounded-full bg-primary" />}
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium">
@@ -415,9 +439,7 @@ export default function CheckoutPage() {
                             <div className="flex items-center gap-3">
                               <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedAddressId === 'new' ? 'border-primary' : 'border-muted-foreground/40'
                                 }`}>
-                                {selectedAddressId === 'new' && (
-                                  <div className="w-2 h-2 rounded-full bg-primary" />
-                                )}
+                                {selectedAddressId === 'new' && <div className="w-2 h-2 rounded-full bg-primary" />}
                               </div>
                               <p className="text-sm font-medium">Usar otra dirección</p>
                             </div>
@@ -428,20 +450,14 @@ export default function CheckoutPage() {
                   )}
 
                   {/* Shipping Address Form */}
-                  {(selectedAddressId === 'new' || !isAuthenticated || savedAddresses.length === 0) && (
-                    <div>
-                      <h2 className="text-lg font-medium mb-4">Dirección de Envío</h2>
-                    </div>
-                  )}
                   <div className="space-y-4">
+                    <h2 className="text-lg font-medium mb-4">Dirección de Envío</h2>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="firstName">Nombre</Label>
                         <Input
-                          id="firstName"
-                          name="firstName"
-                          value={formData.firstName}
-                          onChange={handleInputChange}
+                          id="firstName" name="firstName"
+                          value={formData.firstName} onChange={handleInputChange}
                           className={`mt-1 ${fieldErrors.firstName ? 'border-destructive' : ''}`}
                         />
                         {fieldErrors.firstName && <p className="text-xs text-destructive mt-1">{fieldErrors.firstName}</p>}
@@ -449,10 +465,8 @@ export default function CheckoutPage() {
                       <div>
                         <Label htmlFor="lastName">Apellido</Label>
                         <Input
-                          id="lastName"
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={handleInputChange}
+                          id="lastName" name="lastName"
+                          value={formData.lastName} onChange={handleInputChange}
                           className={`mt-1 ${fieldErrors.lastName ? 'border-destructive' : ''}`}
                         />
                         {fieldErrors.lastName && <p className="text-xs text-destructive mt-1">{fieldErrors.lastName}</p>}
@@ -461,10 +475,8 @@ export default function CheckoutPage() {
                     <div>
                       <Label htmlFor="address">Dirección</Label>
                       <Input
-                        id="address"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
+                        id="address" name="address"
+                        value={formData.address} onChange={handleInputChange}
                         className={`mt-1 ${fieldErrors.address ? 'border-destructive' : ''}`}
                         placeholder="Calle, número, colonia"
                       />
@@ -474,10 +486,8 @@ export default function CheckoutPage() {
                       <div>
                         <Label htmlFor="city">Ciudad</Label>
                         <Input
-                          id="city"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleInputChange}
+                          id="city" name="city"
+                          value={formData.city} onChange={handleInputChange}
                           className={`mt-1 ${fieldErrors.city ? 'border-destructive' : ''}`}
                         />
                         {fieldErrors.city && <p className="text-xs text-destructive mt-1">{fieldErrors.city}</p>}
@@ -485,10 +495,8 @@ export default function CheckoutPage() {
                       <div>
                         <Label htmlFor="state">Estado</Label>
                         <Input
-                          id="state"
-                          name="state"
-                          value={formData.state}
-                          onChange={handleInputChange}
+                          id="state" name="state"
+                          value={formData.state} onChange={handleInputChange}
                           className={`mt-1 ${fieldErrors.state ? 'border-destructive' : ''}`}
                         />
                         {fieldErrors.state && <p className="text-xs text-destructive mt-1">{fieldErrors.state}</p>}
@@ -496,10 +504,8 @@ export default function CheckoutPage() {
                       <div className="col-span-2 sm:col-span-1">
                         <Label htmlFor="zip">Código Postal</Label>
                         <Input
-                          id="zip"
-                          name="zip"
-                          value={formData.zip}
-                          onChange={handleInputChange}
+                          id="zip" name="zip"
+                          value={formData.zip} onChange={handleInputChange}
                           className={`mt-1 ${fieldErrors.zip ? 'border-destructive' : ''}`}
                         />
                         {fieldErrors.zip && <p className="text-xs text-destructive mt-1">{fieldErrors.zip}</p>}
@@ -522,9 +528,7 @@ export default function CheckoutPage() {
                             <div className="flex items-center gap-3">
                               <RadioGroupItem value={option.id} id={option.id} />
                               <div>
-                                <Label htmlFor={option.id} className="cursor-pointer font-medium">
-                                  {option.name}
-                                </Label>
+                                <Label htmlFor={option.id} className="cursor-pointer font-medium">{option.name}</Label>
                                 <p className="text-sm text-muted-foreground">{option.time}</p>
                               </div>
                             </div>
@@ -542,69 +546,8 @@ export default function CheckoutPage() {
                   </Button>
                 </div>
               )}
-
               {step === 'payment' && (
                 <div className="space-y-8">
-                  {/* Payment Method */}
-                  <div>
-                    <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
-                      <CreditCard className="h-5 w-5" />
-                      Información de Pago
-                    </h2>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="cardNumber">Número de Tarjeta</Label>
-                        <Input
-                          id="cardNumber"
-                          name="cardNumber"
-                          value={formData.cardNumber}
-                          onChange={handleInputChange}
-                          className={`mt-1 ${fieldErrors.cardNumber ? 'border-destructive' : ''}`}
-                          placeholder="1234 5678 9012 3456"
-                        />
-                        {fieldErrors.cardNumber && <p className="text-xs text-destructive mt-1">{fieldErrors.cardNumber}</p>}
-                      </div>
-                      <div>
-                        <Label htmlFor="cardName">Nombre en la Tarjeta</Label>
-                        <Input
-                          id="cardName"
-                          name="cardName"
-                          value={formData.cardName}
-                          onChange={handleInputChange}
-                          className={`mt-1 ${fieldErrors.cardName ? 'border-destructive' : ''}`}
-                          placeholder="NOMBRE APELLIDO"
-                        />
-                        {fieldErrors.cardName && <p className="text-xs text-destructive mt-1">{fieldErrors.cardName}</p>}
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="expiry">Fecha de Expiración</Label>
-                          <Input
-                            id="expiry"
-                            name="expiry"
-                            value={formData.expiry}
-                            onChange={handleInputChange}
-                            className={`mt-1 ${fieldErrors.expiry ? 'border-destructive' : ''}`}
-                            placeholder="MM/AA"
-                          />
-                          {fieldErrors.expiry && <p className="text-xs text-destructive mt-1">{fieldErrors.expiry}</p>}
-                        </div>
-                        <div>
-                          <Label htmlFor="cvv">CVV</Label>
-                          <Input
-                            id="cvv"
-                            name="cvv"
-                            value={formData.cvv}
-                            onChange={handleInputChange}
-                            className={`mt-1 ${fieldErrors.cvv ? 'border-destructive' : ''}`}
-                            placeholder="123"
-                          />
-                          {fieldErrors.cvv && <p className="text-xs text-destructive mt-1">{fieldErrors.cvv}</p>}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Shipping Summary */}
                   <div className="bg-muted rounded-lg p-4">
                     <div className="flex items-center gap-3">
@@ -630,20 +573,41 @@ export default function CheckoutPage() {
                     </button>
                   </div>
 
-                  <div className="flex gap-4">
-                    <Button variant="outline" size="lg" onClick={() => { setStep('shipping'); setFieldErrors({}) }}>
-                      Volver
-                    </Button>
-                    <Button size="lg" className="flex-1" onClick={handlePlaceOrder} disabled={placing}>
-                      {placing ? (
-                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Procesando...</>
-                      ) : (
-                        `Confirmar Pedido - ${formatPrice(total)}`
-                      )}
-                    </Button>
+                  {/* Stripe Payment */}
+                  <div className="border border-border rounded-lg p-6">
+                    <h2 className="text-lg font-medium mb-2 flex items-center gap-2">
+                      <CreditCard className="h-5 w-5" />
+                      Pago Seguro con Stripe
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-6">
+                      Serás redirigido a Stripe para completar tu pago de forma segura.
+                    </p>
+
+                    <div className="flex gap-4">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        onClick={() => { setStep('shipping'); setFieldErrors({}) }}
+                      >
+                        Volver
+                      </Button>
+                      <Button
+                        size="lg"
+                        className="flex-1"
+                        onClick={handleStripeCheckout}
+                        disabled={stripeLoading}
+                      >
+                        {stripeLoading ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Redirigiendo...</>
+                        ) : (
+                          `Pagar ${formatPrice(total)} con Stripe`
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
+
             </div>
 
             {/* Order Summary */}

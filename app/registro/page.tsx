@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, UserPlus, ArrowRight } from 'lucide-react'
+import { Eye, EyeOff, UserPlus, ArrowRight, Mail, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -26,6 +26,9 @@ export default function RegisterPage() {
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+    const [emailSent, setEmailSent] = useState(false)
+    const [registeredEmail, setRegisteredEmail] = useState('')
+    const [registeredName, setRegisteredName] = useState('')
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -60,7 +63,10 @@ export default function RegisterPage() {
         })
 
         if (result.success) {
-            router.push('/cuenta')
+            // Mostrar pantalla "Revisa tu correo" en vez de redirigir
+            setRegisteredEmail(form.email)
+            setRegisteredName(form.nombre)
+            setEmailSent(true)
         } else {
             setError(result.error || 'Error al crear la cuenta')
         }
@@ -74,6 +80,51 @@ export default function RegisterPage() {
 
             <main className="flex-1 flex items-center justify-center py-12 px-4">
                 <div className="w-full max-w-md">
+
+                {/* Pantalla de éxito: revisa tu correo */}
+                {emailSent ? (
+                    <div className="bg-card border border-border rounded-lg p-8 text-center">
+                        <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                            <Mail className="h-8 w-8 text-green-600" />
+                        </div>
+                        <CheckCircle className="h-6 w-6 text-green-500 mx-auto -mt-2 mb-4" />
+                        <h1 className="font-serif text-2xl font-bold text-foreground mb-2">
+                            ¡Revisa tu correo!
+                        </h1>
+                        <p className="text-muted-foreground mb-1">
+                            Hola <strong>{registeredName}</strong>, enviamos un correo de verificación a:
+                        </p>
+                        <p className="font-medium text-foreground text-lg mb-6 bg-muted rounded-md py-2 px-4">
+                            {registeredEmail}
+                        </p>
+                        <p className="text-sm text-muted-foreground mb-6">
+                            Haz clic en el enlace del correo para activar tu cuenta. El enlace expira en <strong>24 horas</strong>.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <Button asChild>
+                                <Link href="/login">Ir a iniciar sesión</Link>
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onClick={async () => {
+                                    try {
+                                        await fetch('/api/auth/send-verification', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ email: registeredEmail }),
+                                        })
+                                        alert('Correo reenviado. Revisa tu bandeja de entrada.')
+                                    } catch {
+                                        alert('Error al reenviar. Intenta más tarde.')
+                                    }
+                                }}
+                            >
+                                Reenviar correo
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                <>
                     {/* Header */}
                     <div className="text-center mb-8">
                         <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4">
@@ -183,7 +234,7 @@ export default function RegisterPage() {
                             </Button>
                         </form>
 
-                        <div className="mt-6 text-center">
+                    <div className="mt-6 text-center">
                             <p className="text-sm text-muted-foreground">
                                 ¿Ya tienes cuenta?{' '}
                                 <Link href="/login" className="text-accent hover:underline font-medium">
@@ -192,6 +243,7 @@ export default function RegisterPage() {
                             </p>
                         </div>
                     </div>
+                </> )}
                 </div>
             </main>
 

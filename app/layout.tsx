@@ -12,7 +12,7 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-serif'
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'LUXE Furniture | Muebles de Diseño Exclusivo',
+  title: 'Madera Viva Design',
   description: 'Descubre nuestra colección de muebles de diseño. Sofás, mesas, sillas y más para transformar tu hogar con elegancia.',
   generator: 'v0.app',
   icons: {

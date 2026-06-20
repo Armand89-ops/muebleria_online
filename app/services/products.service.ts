@@ -86,31 +86,50 @@ async function mapRowsToProducts(rows: ProductRow[]): Promise<Product[]> {
 
 export const ProductsService = {
     async getAll(): Promise<Product[]> {
-        const { data, error } = await supabase.from('productos').select('*');
+        const { data, error } = await supabase
+            .from('productos')
+            .select('*')
+            .or('stock.gt.0,stock.is.null') // ✅ cambiado
         if (error) throw error;
         return mapRowsToProducts(data || []);
     },
 
     async getFeatured(): Promise<Product[]> {
-        const { data, error } = await supabase.from('productos').select('*').eq('featured', true);
+        const { data, error } = await supabase
+            .from('productos')
+            .select('*')
+            .eq('featured', true)
+            .or('stock.gt.0,stock.is.null') // ✅ cambiado
         if (error) throw error;
         return mapRowsToProducts(data || []);
     },
 
     async getNew(): Promise<Product[]> {
-        const { data, error } = await supabase.from('productos').select('*').eq('is_new', true);
+        const { data, error } = await supabase
+            .from('productos')
+            .select('*')
+            .eq('is_new', true)
+            .or('stock.gt.0,stock.is.null') // ✅ cambiado
         if (error) throw error;
         return mapRowsToProducts(data || []);
     },
 
     async getByCategory(category: string): Promise<Product[]> {
-        const { data, error } = await supabase.from('productos').select('*').eq('category', category);
+        const { data, error } = await supabase
+            .from('productos')
+            .select('*')
+            .eq('category', category)
+            .or('stock.gt.0,stock.is.null') // ✅ cambiado
         if (error) throw error;
         return mapRowsToProducts(data || []);
     },
 
     async getById(id: string): Promise<Product | undefined> {
-        const { data, error } = await supabase.from('productos').select('*').eq('id', id).single();
+        const { data, error } = await supabase
+            .from('productos')
+            .select('*')
+            .eq('id', id)
+            .single();
         if (error || !data) return undefined;
         return mapRowToProduct(data);
     },
