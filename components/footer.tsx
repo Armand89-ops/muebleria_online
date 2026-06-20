@@ -61,7 +61,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <h2 className="font-serif text-3xl font-bold mb-4">LUXE</h2>
+            <h2 className="font-serif text-3xl font-bold mb-4">MADERA VIVA DESING</h2>
             <p className="text-primary-foreground/70 text-sm leading-relaxed max-w-md">
               Transformamos espacios con muebles de diseño exclusivo.
               Cada pieza es una declaración de estilo y calidad que perdura en el tiempo.
@@ -151,7 +151,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-primary-foreground/10">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-xs text-primary-foreground/50">
-              {new Date().getFullYear()} LUXE Furniture. Todos los derechos reservados.
+              {new Date().getFullYear()} MADERA VIVA DESING. Todos los derechos reservados.
             </p>
             <div className="flex gap-6">
               <Link href="/privacidad" className="text-xs text-primary-foreground/50 hover:text-primary-foreground transition-colors">

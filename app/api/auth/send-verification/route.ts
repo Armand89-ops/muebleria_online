@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/db'
+import { supabaseAdmin as supabase } from '@/lib/db'
+import { resend } from '@/lib/resend'
 import crypto from 'crypto'
 
-// Función para generar token seguro
+// GET /api/auth/send-verification
 function generateToken(): string {
   return crypto.randomBytes(32).toString('hex')
 }
@@ -68,29 +69,46 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const verificationUrl = `${baseUrl}/verificar-email?token=${token}`
 
-    // TODO: Aquí enviarías el email real
-    // Por ahora, mostrar el link en la consola para testing
-    console.log('===========================================')
-    console.log('EMAIL DE VERIFICACIÓN')
-    console.log(`Para: ${email}`)
-    console.log(`Link: ${verificationUrl}`)
-    console.log('===========================================')
-
-    // Si tienes Resend configurado, descomenta esto:
-    /*
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: 'tu-tienda@tudominio.com',
-      to: email,
-      subject: 'Confirma tu email - Mueblería Online',
-      html: `
-        <h1>Hola ${usuario.nombre}!</h1>
-        <p>Gracias por registrarte. Por favor confirma tu email haciendo clic en el siguiente enlace:</p>
-        <a href="${verificationUrl}">Confirmar mi email</a>
-        <p>Este enlace expira en 24 horas.</p>
-      `
-    })
-    */
+    // Enviar correo real con Resend
+    try {
+      const emailResult = await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
+        to: email,
+        subject: '✅ Verifica tu cuenta — Mueblería Online',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: #1a1a1a; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
+              <h1 style="color: #f5f0e8; margin: 0; font-size: 24px;">Mueblería Online</h1>
+            </div>
+            <div style="background: #fafaf8; padding: 32px; border-radius: 0 0 8px 8px; border: 1px solid #e8e4dc;">
+              <h2 style="color: #1a1a1a; margin-top: 0;">¡Hola ${usuario.nombre}! 👋</h2>
+              <p style="color: #555; line-height: 1.6;">Solicitaste verificar tu correo electrónico. Haz clic en el botón para activar tu cuenta.</p>
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${verificationUrl}"
+                   style="background: #1a1a1a; color: white; padding: 14px 32px;
+                          text-decoration: none; border-radius: 6px; display: inline-block;
+                          font-size: 16px; font-weight: bold;">
+                  ✅ Verificar mi cuenta
+                </a>
+              </div>
+              <p style="color: #888; font-size: 13px;">⏰ Este enlace expira en <strong>24 horas</strong>.</p>
+              <p style="color: #888; font-size: 13px;">Si no solicitaste esto, puedes ignorar este correo.</p>
+              <hr style="border: none; border-top: 1px solid #e8e4dc; margin: 24px 0;" />
+              <p style="color: #bbb; font-size: 12px; text-align: center;">Si el botón no funciona, copia este enlace:<br/>
+                <a href="${verificationUrl}" style="color: #888; word-break: break-all;">${verificationUrl}</a>
+              </p>
+            </div>
+          </div>
+        `,
+      })
+      console.log('✅ Correo de verificación (reenvío) enviado:', emailResult)
+    } catch (emailError) {
+      console.error('❌ Error al enviar correo de verificación:', emailError)
+      return NextResponse.json(
+        { error: 'Error al enviar el correo de verificación. Intenta de nuevo.' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ 
       success: true,

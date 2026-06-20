@@ -105,7 +105,7 @@ export default function CatalogoPage() {
 
     // Stock filter
     if (inStockOnly) {
-      result = result.filter((p) => p.inStock)
+      result = result.filter((p) => p.stock === undefined || p.stock > 0)
     }
 
     // Sort

@@ -29,7 +29,7 @@ export default function PrivacidadPage() {
             <section>
               <h2 className="text-xl font-semibold text-foreground mb-3">1. Informacion que Recopilamos</h2>
               <p className="text-muted-foreground leading-relaxed">
-                En LUXE Furniture recopilamos informacion personal que nos proporcionas directamente al realizar compras, crear una cuenta o contactarnos. Esta informacion puede incluir tu nombre, direccion de correo electronico, direccion postal, numero de telefono e informacion de pago.
+                En MADERA VIVA DESING recopilamos informacion personal que nos proporcionas directamente al realizar compras, crear una cuenta o contactarnos. Esta informacion puede incluir tu nombre, direccion de correo electronico, direccion postal, numero de telefono e informacion de pago.
               </p>
               <p className="text-muted-foreground leading-relaxed mt-3">
                 Tambien recopilamos informacion automaticamente cuando navegas en nuestro sitio, incluyendo tu direccion IP, tipo de navegador, paginas visitadas y tiempo de permanencia.
@@ -87,7 +87,7 @@ export default function PrivacidadPage() {
             <section>
               <h2 className="text-xl font-semibold text-foreground mb-3">7. Contacto</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Si tienes preguntas sobre esta politica de privacidad o deseas ejercer tus derechos, puedes contactarnos a traves de nuestro <Link href="/contacto" className="text-accent hover:underline">formulario de contacto</Link> o enviando un correo a privacidad@luxefurniture.com.
+                Si tienes preguntas sobre esta politica de privacidad o deseas ejercer tus derechos, puedes contactarnos a traves de nuestro <Link href="/contacto" className="text-accent hover:underline">formulario de contacto</Link> o enviando un correo a privacidad@MADERA VIVA DESING.com.
               </p>
             </section>
           </div>

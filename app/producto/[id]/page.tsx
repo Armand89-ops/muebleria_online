@@ -175,7 +175,7 @@ export default function ProductPage() {
                 href={`/catalogo?category=${product.category}`}
                 className="text-muted-foreground hover:text-foreground transition-colors capitalize"
               >
-                {product.category === 'living' ? 'Sala' : product.category === 'dining' ? 'Comedor' : product.category === 'bedroom' ? 'Dormitorio' : 'Oficina'}
+                {product.category === 'Sala' ? 'Sala' : product.category === 'Comedor' ? 'Comedor' : product.category === 'Dormitorio' ? 'Dormitorio' : 'Oficina'}
               </Link>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
               <span className="text-foreground font-medium truncate">{product.name}</span>
@@ -207,10 +207,10 @@ export default function ProductPage() {
                     }
                     return true;
                   })() && (
-                    <span className="absolute top-4 left-4 px-3 py-1 bg-accent text-accent-foreground text-sm font-medium rounded">
-                      Nuevo
-                    </span>
-                  )}
+                      <span className="absolute top-4 left-4 px-3 py-1 bg-accent text-accent-foreground text-sm font-medium rounded">
+                        Nuevo
+                      </span>
+                    )}
                   {product.originalPrice && (
                     <span className="absolute top-4 right-4 px-3 py-1 bg-destructive text-white text-sm font-medium rounded">
                       -{Math.round((1 - product.price / product.originalPrice) * 100)}%

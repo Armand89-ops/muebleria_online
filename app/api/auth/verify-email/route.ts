@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/db'
+import { supabaseAdmin as supabase } from '@/lib/db'
 
 // GET - Verificar email con token
 export async function GET(request: NextRequest) {
@@ -50,9 +50,9 @@ export async function GET(request: NextRequest) {
       .update({ usado: true })
       .eq('id', tokenData.id)
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: 'Email verificado correctamente' 
+      message: 'Email verificado correctamente'
     })
   } catch (error) {
     console.error('Error verificando email:', error)

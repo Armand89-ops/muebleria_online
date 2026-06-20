@@ -19,10 +19,10 @@ import {
 const navigation = [
   { name: 'Inicio', href: '/' },
   { name: 'Catálogo', href: '/catalogo' },
-  { name: 'Sala', href: '/catalogo?category=living' },
-  { name: 'Comedor', href: '/catalogo?category=dining' },
-  { name: 'Dormitorio', href: '/catalogo?category=bedroom' },
-  { name: 'Oficina', href: '/catalogo?category=office' },
+  { name: 'Sala', href: '/catalogo?category=Sala' },
+  { name: 'Comedor', href: '/catalogo?category=Comedor' },
+  { name: 'Dormitorio', href: '/catalogo?category=Recámara' },
+  { name: 'Oficina', href: '/catalogo?category=Oficina' },
   { name: 'Ofertas', href: '/ofertas' },
 ]
 
@@ -55,60 +55,60 @@ export function Header() {
           {/* Mobile menu */}
           {mounted && (
             <Sheet>
-            <SheetTrigger asChild className="lg:hidden">
-              <Button variant="ghost" size="icon" className="mr-2" suppressHydrationWarning>
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Abrir menú</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[350px]">
-              <SheetTitle className="text-lg font-semibold mb-6">Menú</SheetTitle>
-              <nav className="flex flex-col gap-4">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="text-lg font-medium text-foreground hover:text-accent transition-colors py-2"
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-                <div className="border-t border-border pt-4 mt-2">
-                  {isAuthenticated ? (
-                    <>
-                      <Link href="/cuenta" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                        <User className="h-5 w-5" /> {user?.nombre || 'Mi Cuenta'}
-                      </Link>
-                      <Link href="/cuenta?tab=favoritos" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                        <Heart className="h-5 w-5" /> Favoritos
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <Link href="/login" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                        <LogIn className="h-5 w-5" /> Iniciar Sesión
-                      </Link>
-                      <Link href="/registro" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                        <User className="h-5 w-5" /> Crear Cuenta
-                      </Link>
-                    </>
-                  )}
-                  <Link href="/contacto" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                    Contacto
-                  </Link>
-                  <Link href="/faq" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
-                    Ayuda
-                  </Link>
-                </div>
-              </nav>
-            </SheetContent>
+              <SheetTrigger asChild className="lg:hidden">
+                <Button variant="ghost" size="icon" className="mr-2" suppressHydrationWarning>
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Abrir menú</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[350px]">
+                <SheetTitle className="text-lg font-semibold mb-6">Menú</SheetTitle>
+                <nav className="flex flex-col gap-4">
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="text-lg font-medium text-foreground hover:text-accent transition-colors py-2"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                  <div className="border-t border-border pt-4 mt-2">
+                    {isAuthenticated ? (
+                      <>
+                        <Link href="/cuenta" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                          <User className="h-5 w-5" /> {user?.nombre || 'Mi Cuenta'}
+                        </Link>
+                        <Link href="/cuenta?tab=favoritos" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                          <Heart className="h-5 w-5" /> Favoritos
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/login" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                          <LogIn className="h-5 w-5" /> Iniciar Sesión
+                        </Link>
+                        <Link href="/registro" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                          <User className="h-5 w-5" /> Crear Cuenta
+                        </Link>
+                      </>
+                    )}
+                    <Link href="/contacto" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                      Contacto
+                    </Link>
+                    <Link href="/faq" className="flex items-center gap-3 text-lg font-medium text-foreground hover:text-accent transition-colors py-2">
+                      Ayuda
+                    </Link>
+                  </div>
+                </nav>
+              </SheetContent>
             </Sheet>
           )}
 
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             <h1 className="font-serif text-2xl font-bold tracking-tight text-foreground">
-              LUXE
+              MADERA VIVA DESING
             </h1>
           </Link>
 
