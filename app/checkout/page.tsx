@@ -246,6 +246,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           userId: user?.id,
           items: items.map(item => ({
+            id: item.product.id,
             name: item.product.name,
             price: item.product.price,
             quantity: item.quantity,

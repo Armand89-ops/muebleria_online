@@ -211,7 +211,7 @@ export default function ProductPage() {
                         Nuevo
                       </span>
                     )}
-                  {product.originalPrice && (
+                  {product.originalPrice && product.originalPrice > product.price && (
                     <span className="absolute top-4 right-4 px-3 py-1 bg-destructive text-white text-sm font-medium rounded">
                       -{Math.round((1 - product.price / product.originalPrice) * 100)}%
                     </span>
@@ -273,7 +273,7 @@ export default function ProductPage() {
                   <span className="text-3xl font-bold text-foreground">
                     {formatPrice(product.price)}
                   </span>
-                  {product.originalPrice && (
+                  {product.originalPrice && product.originalPrice > product.price && (
                     <span className="text-xl text-muted-foreground line-through">
                       {formatPrice(product.originalPrice)}
                     </span>
