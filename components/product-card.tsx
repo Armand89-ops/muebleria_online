@@ -68,7 +68,7 @@ export function ProductCard({ product }: ProductCardProps) {
             Nuevo
           </span>
         )}
-        {product.originalPrice && (
+        {product.originalPrice && product.originalPrice > product.price && (
           <span className="px-2 py-1 bg-destructive text-white text-xs font-medium rounded">
             -{Math.round((1 - product.price / product.originalPrice) * 100)}%
           </span>
@@ -149,7 +149,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <span className="text-lg font-semibold text-card-foreground">
             {formatPrice(product.price)}
           </span>
-          {product.originalPrice && (
+          {product.originalPrice && product.originalPrice > product.price && (
             <span className="text-sm text-muted-foreground line-through">
               {formatPrice(product.originalPrice)}
             </span>

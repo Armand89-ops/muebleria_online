@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/db'
+import { supabaseAdmin } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 
 // POST - Restablecer contraseña con token
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Buscar token válido
-    const { data: tokenData, error: tokenError } = await supabase
+    const { data: tokenData, error: tokenError } = await supabaseAdmin
       .from('tokens_auth')
       .select('*')
       .eq('token', token)
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 10)
 
     // Actualizar contraseña
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('usuarios')
       .update({ 
         password_hash: passwordHash,
@@ -59,13 +59,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Marcar token como usado
-    await supabase
+    await supabaseAdmin
       .from('tokens_auth')
       .update({ usado: true })
       .eq('id', tokenData.id)
 
     // Invalidar todos los tokens de reset de este usuario
-    await supabase
+    await supabaseAdmin
       .from('tokens_auth')
       .update({ usado: true })
       .eq('usuario_id', tokenData.usuario_id)
